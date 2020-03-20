@@ -4,13 +4,20 @@
 #include "SDL.h"
 #include <utility>
 #include <string>
+#include <list>
+#include <memory>
+#include <stack>
 #include "page.h"
-#include "../disable_copy_and_move.inc"
+#include "../copy_and_move.inc"
 
 class Window
 {
 private:
     SDL_Window* window_ptr = nullptr;
+    SDL_GLContext gl_context = nullptr;
+
+    std::list<std::unique_ptr<Page>> pages;
+    std::stack<Page*> active_pages;
 public:
     Window();
     ~Window();
@@ -24,11 +31,8 @@ public:
     std::string get_title();
     void set_title(std::string title);
 
-    bool is_set_icon();
     void set_icon(SDL_Surface* icon_surface);
 
-    void show();
-    void hide();
     void fullscreen();
     void windowed();
 

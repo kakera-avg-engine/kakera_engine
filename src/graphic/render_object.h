@@ -6,14 +6,7 @@
 #include <memory>
 #include <list>
 #include <utility>
-#include "../disable_copy_and_move.inc"
-
-enum class TextureFillingMethod
-{
-    stretch,
-    tile,
-    repeat
-};
+#include "../copy_and_move.inc"
 
 class RenderObject
 {
@@ -28,14 +21,14 @@ public:
     RenderObject* parent = nullptr;
     std::list<std::unique_ptr<RenderObject>> children;
 
-    RenderObject();
+    RenderObject(bool upside_down = false);
     RenderObject(Texture&& texture, ShaderBase& shader);
     ~RenderObject();
 
     KAKERA_DISABLE_COPY(RenderObject);
 
     bool is_set_texture();
-    void set_texture(Texture&& texture, TextureFillingMethod method = TextureFillingMethod::stretch);
+    void set_texture(Texture&& texture);
 
     bool is_set_shader();
     void set_shader(ShaderBase& shader);
