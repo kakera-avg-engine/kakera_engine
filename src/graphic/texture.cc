@@ -42,15 +42,17 @@ Texture::~Texture()
 
 Texture& Texture::operator=(Texture&& other)
 {
-    w = other.w;
-    h = other.h;
-    tex_id = other.tex_id;
-    gl_format = other.gl_format;
+    if (&other != this) {
+        w = other.w;
+        h = other.h;
+        tex_id = other.tex_id;
+        gl_format = other.gl_format;
 
-    other.w = 0;
-    other.h = 0;
-    other.tex_id = UINT_MAX;
-    other.gl_format = GL_RGB;
+        other.w = 0;
+        other.h = 0;
+        other.tex_id = UINT_MAX;
+        other.gl_format = GL_RGB;
+    }
 
     return *this;
 }
@@ -67,7 +69,12 @@ void Texture::update_pixels(int x, int y, int width, int height, unsigned char* 
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, gl_format, GL_UNSIGNED_BYTE, pixels);
 }
 
-const unsigned int Texture::get_id()
+const GLuint Texture::get_id()
 {
-    return 0;
+    return tex_id;
+}
+
+void Texture::bind()
+{
+    glBindTexture(GL_TEXTURE_2D, tex_id);
 }

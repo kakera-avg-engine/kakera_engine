@@ -16,7 +16,7 @@ class Texture
 {
 private:
     int w = 0, h = 0;
-    unsigned int tex_id = UINT_MAX;
+    GLuint tex_id = UINT_MAX;
     GLenum gl_format = GL_RGB;
 public:
     Texture(int width, int height, TextureFormat format = TextureFormat::rgb);
@@ -28,7 +28,9 @@ public:
     void update_pixels(unsigned char* pixels);
     void update_pixels(int x, int y, int width, int height, unsigned char* pixels);
 
-    const unsigned int get_id();
+    const GLuint get_id();
+
+    void bind();
 };
 
 #endif // !KAKERA_ENGINE_GRAPHIC_TEXTURE

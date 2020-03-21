@@ -2,20 +2,67 @@
 #define KAKERA_ENGINE_GRAPHIC_PAGE
 
 #include "glad/glad.h"
-#include "../graphic/texture.h"
+#include "../graphic/render_object.h"
 #include <memory>
+#include <climits>
+#include <string>
+#include <cstring>
+#include <iterator>
+#include <stack>
+#include <vector>
+#include "component_base.hpp"
+#include "../graphic/shader_normal.hpp"
 #include "../copy_and_move.inc"
+#if (!defined(_DEBUG) || defined(NDEBUG))
+#   include "msgpack.hpp"
+#else
+#   include "pugixml.hpp"
+#include <iostream>
+#endif
+
+#include "image.hpp"
+
+enum class PageDisplayMode
+{
+    Unique,
+    Shared
+};
+
+PageDisplayMode int_to_display_mode(int mode_int);
 
 class Page
 {
 private:
-    unsigned int fbo, rbo;
-    std::unique_ptr<Texture> render_target;
+#if (defined(_DEBUG) || !defined(NDEBUG))
+    struct XMLTreeWalker : pugi::xml_tree_walker
+    {
+        Page* page = nullptr;
+        bool for_each(pugi::xml_node& node) override;
+    };
+#endif
+
+    GLuint fbo = UINT_MAX, rbo = UINT_MAX;
+    RenderObject render_obj;
+
+    PageDisplayMode mode;
+    Component root;
+
+    std::list<Component*> component_tree_cache;
+
+    void refresh_cache();
 public:
-    Page();
+    Page(PageDisplayMode mode = PageDisplayMode::Unique);
+    Page(std::string src);
     ~Page();
 
     KAKERA_DISABLE_COPY(Page);
+    KAKERA_DISABLE_MOVE(Page);
+
+    PageDisplayMode get_display_mode();
+
+    void resize(int width, int height);
+    void draw();
+    void render();
 };
 
 #endif // !KAKERA_ENGINE_GRAPHIC_PAGE
