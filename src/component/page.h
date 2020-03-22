@@ -42,7 +42,7 @@ private:
 #endif
 
     GLuint fbo = UINT_MAX, rbo = UINT_MAX;
-    RenderObject render_obj;
+    std::unique_ptr<RenderObject> render_obj;
 
     PageDisplayMode mode;
     Component root;

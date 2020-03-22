@@ -11,13 +11,14 @@
 class Image : public Component
 {
 private:
-    RenderObject render_obj;
+    std::unique_ptr<RenderObject> render_obj;
 public:
     KAKERA_DISABLE_COPY(Image);
 
     Image()
     {
-        render_obj.set_shader(&KAKERA_SHADER_NORMAL);
+        render_obj = std::make_unique<RenderObject>(false);
+        render_obj->set_shader(&KAKERA_SHADER_NORMAL);
     }
 
     Image(Image&& other)
@@ -63,13 +64,13 @@ public:
     void set_size(int width, int height) override
     {
         Component::set_size(width, height);
-        render_obj.set_size(width, height);
+        render_obj->set_size(width, height);
     }
 
     void set_position(int x, int y) override
     {
         Component::set_position(x, y);
-        render_obj.set_position(x, y);
+        render_obj->set_position(x, y);
     }
 
     void set_src(const char* src)
@@ -80,12 +81,12 @@ public:
         Texture texture(image_surface->w, image_surface->h, format);
         texture.update_pixels((unsigned char*)image_surface->pixels);
         SDL_FreeSurface(image_surface);
-        render_obj.set_texture(std::move(texture));
+        render_obj->set_texture(std::move(texture));
     }
 
     void render() override
     {
-        render_obj.render();
+        render_obj->render();
     }
 };
 

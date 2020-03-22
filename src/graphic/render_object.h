@@ -54,6 +54,8 @@ public:
     void attach_color(SDL_Color color);
     void cancel_attach_color();
 
+    Texture* get_texture();
+
     void render();
 };
 

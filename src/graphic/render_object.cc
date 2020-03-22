@@ -167,6 +167,11 @@ void RenderObject::cancel_attach_color()
     if (is_attach_color) is_attach_color = false;
 }
 
+Texture* RenderObject::get_texture()
+{
+    return texture.get();
+}
+
 void RenderObject::render()
 {
     if (!texture || !shader) return;

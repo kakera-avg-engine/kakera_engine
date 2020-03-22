@@ -7,6 +7,7 @@
 #include <list>
 #include <utility>
 #include <string>
+#include <memory>
 
 class Component
 {

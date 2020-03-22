@@ -55,6 +55,22 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
 
 void Page::refresh_cache()
 {
+    if (!component_tree_cache.empty()) component_tree_cache.clear();
+
+    std::stack<Component*> temp_stack;
+    temp_stack.push(&root);
+    while (!temp_stack.empty()) {
+        Component* component = temp_stack.top();
+        temp_stack.pop();
+
+        component_tree_cache.push_back(component);
+
+        if (!component->children.empty()) {
+            for (auto iter = component->children.rbegin(); iter != component->children.rend(); iter++) {
+                temp_stack.push((*iter).get());
+            }
+        }
+    }
 }
 
 Page::Page(PageDisplayMode mode)
@@ -74,20 +90,7 @@ Page::Page(std::string src)
     walker.page = this;
     doc.traverse(walker);
 
-    std::stack<Component*> temp_stack;
-    temp_stack.push(&root);
-    while (!temp_stack.empty()) {
-        Component* component = temp_stack.top();
-        temp_stack.pop();
-
-        component_tree_cache.push_back(component);
-
-        if (!component->children.empty()) {
-            for (auto iter = component->children.rbegin(); iter != component->children.rend(); iter++) {
-                temp_stack.push((*iter).get());
-            }
-        }
-    }
+    refresh_cache();
 #endif
 }
 
@@ -106,9 +109,9 @@ void Page::resize(int width, int height)
 {
     root.set_size(width, height);
 
-    render_obj = std::move(RenderObject(true));
-    render_obj.set_size(width, height);
-    render_obj.set_shader(&KAKERA_SHADER_NORMAL);
+    render_obj.reset(new RenderObject(true));
+    render_obj->set_size(width, height);
+    render_obj->set_shader(&KAKERA_SHADER_NORMAL);
 
     if (glIsFramebuffer(fbo)) glDeleteFramebuffers(1, &fbo);
     glGenFramebuffers(1, &fbo);
@@ -116,7 +119,7 @@ void Page::resize(int width, int height)
 
     Texture color_attachment(width, height);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment.get_id(), 0);
-    render_obj.set_texture(std::move(color_attachment));
+    render_obj->set_texture(std::move(color_attachment));
 
     if (glIsRenderbuffer(rbo)) glDeleteRenderbuffers(1, &rbo);
     glGenRenderbuffers(1, &rbo);
@@ -142,5 +145,5 @@ void Page::draw()
 
 void Page::render()
 {
-    render_obj.render();
+    render_obj->render();
 }

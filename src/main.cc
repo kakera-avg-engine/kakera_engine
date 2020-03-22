@@ -6,12 +6,17 @@
 #include "SDL.h"
 #include "SDL_image.h"
 #include "glad/glad.h"
+extern "C"
+{
+#include "libavformat/avformat.h"
+}
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   include "msgpack.hpp"
 #else
 #   include "pugixml.hpp"
 #endif
 #include "component/window.h"
+#include "log/log.h"
 
 void load_config(Window& window)
 {
@@ -67,6 +72,9 @@ int main(int argc, char* argv[])
 
     IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
+    // Init FFmpeg
+    av_register_all();
+
     // Windows HiDPI
 #ifdef _WIN32
     typedef HRESULT(*WINAPI_SETDPI)(int);
@@ -76,10 +84,15 @@ int main(int argc, char* argv[])
         setdpi_func(1);
         FreeLibrary(shcore_dll);
     }
+    else {
+        KAKERA_LOG(LogLevel::Warning, "Too old Windows version to enable HiDPI.");
+    }
 #endif // _WIN32
 
     // Create main window.
     Window main_window;
+
+    KAKERA_LOG(LogLevel::Info, "Test log.");
 
     // Init OpenGL
     gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
