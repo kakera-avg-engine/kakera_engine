@@ -103,10 +103,9 @@ RenderObject& RenderObject::operator=(RenderObject&& other)
     return *this;
 }
 
-void RenderObject::set_texture(Texture&& texture)
+void RenderObject::set_texture(std::shared_ptr<Texture> texture)
 {
-    if (this->texture) delete this->texture.release();
-    this->texture = std::make_unique<Texture>(std::move(texture));
+    this->texture.swap(texture);
 }
 
 void RenderObject::set_shader(ShaderBase* shader)

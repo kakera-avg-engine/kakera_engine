@@ -19,7 +19,7 @@ class RenderObject
 {
 private:
     GLuint vao = UINT_MAX, vbo = UINT_MAX;
-    std::unique_ptr<Texture> texture;
+    std::shared_ptr<Texture> texture;
     ShaderBase* shader = nullptr;
 
     int width = 0, height = 0;
@@ -35,7 +35,7 @@ public:
     KAKERA_DISABLE_COPY(RenderObject);
     KAKERA_ENABLE_MOVE(RenderObject);
 
-    void set_texture(Texture&& texture);
+    void set_texture(std::shared_ptr<Texture> texture);
 
     void set_shader(ShaderBase* shader);
 

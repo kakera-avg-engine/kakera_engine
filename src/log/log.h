@@ -8,6 +8,7 @@
 #include <ctime>
 #include <string>
 #include <unordered_map>
+#include <cstdlib>
 #ifdef _WIN32
 #   include <process.h>
 #endif

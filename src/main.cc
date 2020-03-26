@@ -17,6 +17,7 @@ extern "C"
 #endif
 #include "component/window.h"
 #include "log/log.h"
+#include "uuid.hpp"
 
 void load_config(Window& window)
 {
@@ -65,7 +66,9 @@ int main(int argc, char* argv[])
 {
     // Init SDL
     SDL_SetMainReady();
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0) {
+        KAKERA_LOG(LogLevel::Fatal, "Can't load SDL2.");
+    }
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -92,10 +95,10 @@ int main(int argc, char* argv[])
     // Create main window.
     Window main_window;
 
-    KAKERA_LOG(LogLevel::Info, "Test log.");
-
     // Init OpenGL
-    gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress);
+    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
+        KAKERA_LOG(LogLevel::Fatal, "Can't load OpenGL library.");
+    }
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
