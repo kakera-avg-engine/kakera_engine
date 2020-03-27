@@ -1,14 +1,10 @@
 #ifndef KAKERA_ENGINE_FILE_INDEX
 #define KAKERA_ENGINE_FILE_INDEX
 
-#include <string>
-
 struct FileIndex
 {
-    std::string filename;
-    std::string uuid;
-    size_t size;
-    size_t offset;
+    size_t size = 0;
+    size_t offset = 0;
 };
 
 #endif // !KAKERA_ENGINE_FILE_INDEX

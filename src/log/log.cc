@@ -59,6 +59,10 @@ void Log::print(LogLevel level, std::string what, std::string file, int line)
     std::string format_str = fmt::format("[{0}] {1} {2}({3}): {4}\n", level_map[level], now_time(), real_file, line, what);
     log_file << format_str;
 
+#if (defined(_DEBUG) || !defined(NDEBUG))
+    fmt::print(format_str);
+#endif
+
     if (level == LogLevel::Fatal) std::abort();
 }
 

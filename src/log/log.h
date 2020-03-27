@@ -9,13 +9,15 @@
 #include <string>
 #include <unordered_map>
 #include <cstdlib>
+#include <cstdarg>
+#include <vector>
 #ifdef _WIN32
 #   include <process.h>
 #endif
 #include "../copy_and_move.inc"
 #include "../version.inc"
 
-#define KAKERA_LOG(level,what) Log::get().print(level,what,__FILE__,__LINE__)
+#define KAKERA_LOG(level,...) Log::get().print(level,fmt::format(__VA_ARGS__),__FILE__,__LINE__)
 
 enum class LogLevel
 {

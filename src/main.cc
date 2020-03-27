@@ -2,19 +2,24 @@
 #   define WIN32_LEAN_AND_MEAN
 #   include <Windows.h>
 #endif // !_WIN32
+
 #define SDL_MAIN_HANDLED
 #include "SDL.h"
 #include "SDL_image.h"
+
 #include "glad/glad.h"
+
 extern "C"
 {
 #include "libavformat/avformat.h"
 }
+
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   include "msgpack.hpp"
 #else
 #   include "pugixml.hpp"
 #endif
+
 #include "component/window.h"
 #include "log/log.h"
 #include "uuid.hpp"
