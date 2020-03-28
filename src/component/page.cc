@@ -11,6 +11,9 @@ PageDisplayMode int_to_display_mode(int mode_int)
 #if (defined(_DEBUG) || !defined(NDEBUG))
 bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
 {
+    if (node_name_is("KakeraPage"))
+        page->uuid = node.attribute("uuid").as_string();
+
     if (node_name_is("DisplayMode")) {
         if (strcmp(node.child_value(), "unique") == 0) page->mode = PageDisplayMode::Unique;
         else if (strcmp(node.child_value(), "shared") == 0) page->mode = PageDisplayMode::Shared;
@@ -117,9 +120,11 @@ void Page::resize(int width, int height)
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    Texture color_attachment(width, height);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment.get_id(), 0);
-    render_obj->set_texture(std::move(color_attachment));
+    KAKERA_TEXTURE_MANAGER.destroy_texture(uuid);
+    KAKERA_TEXTURE_MANAGER.set_texture(uuid, Texture(width, height));
+    Texture* color_attachment = KAKERA_TEXTURE_MANAGER[uuid];
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment->get_id(), 0);
+    render_obj->set_texture(color_attachment);
 
     if (glIsRenderbuffer(rbo)) glDeleteRenderbuffers(1, &rbo);
     glGenRenderbuffers(1, &rbo);

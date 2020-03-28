@@ -12,7 +12,7 @@
 class TextureManager
 {
 private:
-    std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
+    std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
 
     TextureManager() = default;
     ~TextureManager() = default;
@@ -21,8 +21,10 @@ public:
     KAKERA_DISABLE_MOVE(TextureManager);
 
     void set_texture(std::string id, Texture&& texture);
-    std::shared_ptr<Texture> get_texture(std::string id);
-    std::shared_ptr<Texture> operator[](std::string id);
+    Texture* get_texture(std::string id);
+    Texture* operator[](std::string id);
+
+    void destroy_texture(std::string id);
 
     static TextureManager& get();
 };

@@ -2,6 +2,8 @@
 #define KAKERA_ENGINE_COMPONENT_IMAGE
 
 #include "component_base.hpp"
+#include "../graphic/texture_manager.h"
+#include "../file_package/package_manager.h"
 #include "SDL.h"
 #include "SDL_image.h"
 #include "../graphic/shader_normal.hpp"
@@ -75,13 +77,27 @@ public:
 
     void set_src(const char* src)
     {
-        SDL_Surface* image_surface = IMG_Load(src);
-        TextureFormat format = TextureFormat::rgb;
-        if (image_surface->format->BytesPerPixel == 4) format == TextureFormat::rgba;
-        Texture texture(image_surface->w, image_surface->h, format);
-        texture.update_pixels((unsigned char*)image_surface->pixels);
-        SDL_FreeSurface(image_surface);
-        render_obj->set_texture(std::move(texture));
+        if (auto image_file = KAKERA_PACKAGE_MANAGER.get_file(src); image_file.has_value()) {
+
+            Texture* texture = KAKERA_TEXTURE_MANAGER[src];
+
+            if (!texture) {
+                File file = std::move(image_file.value());
+                SDL_RWops* sdl_file = SDL_RWFromMem(*file, file.size());
+                SDL_Surface* image_surface = IMG_Load_RW(sdl_file, 1);
+                if (image_surface) {
+                    TextureFormat format = TextureFormat::rgb;
+                    if (image_surface->format->BytesPerPixel == 4)
+                        format == TextureFormat::rgba;
+                    KAKERA_TEXTURE_MANAGER.set_texture(src, Texture(image_surface->w, image_surface->h, format));
+                    texture = KAKERA_TEXTURE_MANAGER[src];
+                    texture->update_pixels((unsigned char*)image_surface->pixels);
+                    SDL_FreeSurface(image_surface);
+                }
+            }
+
+            render_obj->set_texture(texture);
+        }
     }
 
     void render() override

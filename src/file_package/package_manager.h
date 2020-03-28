@@ -5,6 +5,8 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <optional>
+#include "../log/log.h"
 #include "../copy_and_move.inc"
 
 #define KAKERA_PACKAGE_MANAGER PackageManager::get()
@@ -12,7 +14,7 @@
 class PackageManager
 {
 private:
-    std::unordered_map<std::string, std::shared_ptr<Package>> packages;
+    std::unordered_map<std::string, std::unique_ptr<Package>> packages;
 
     PackageManager() = default;
     ~PackageManager() = default;
@@ -22,8 +24,10 @@ public:
 
     void add_package(std::string id, Package&& package);
 
-    std::shared_ptr<Package> get_package(std::string id);
-    std::shared_ptr<Package> operator[](std::string id);
+    Package* get_package(std::string id);
+    Package* operator[](std::string id);
+
+    std::optional<File> get_file(std::string src);
 
     static PackageManager& get();
 };

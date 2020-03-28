@@ -22,7 +22,7 @@ extern "C"
 
 #include "component/window.h"
 #include "log/log.h"
-#include "uuid.hpp"
+#include "file_package/package_manager.h"
 
 void load_config(Window& window)
 {
@@ -54,6 +54,14 @@ void load_config(Window& window)
         SDL_Surface* icon_surface = IMG_Load(icon.c_str());
         window.set_icon(icon_surface);
         SDL_FreeSurface(icon_surface);
+    }
+
+    pugi::xml_node packages = root.child("Packages");
+    for (auto& package : packages) {
+        std::string id = package.attribute("id").as_string();
+        std::string src = package.attribute("src").as_string();
+        src = debug_root_dir + src;
+        KAKERA_PACKAGE_MANAGER.add_package(id, Package(src));
     }
 
     pugi::xml_node pages = root.child("Pages");

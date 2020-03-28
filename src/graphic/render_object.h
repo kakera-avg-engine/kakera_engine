@@ -3,7 +3,6 @@
 
 #include "shader_base.hpp"
 #include "texture.h"
-#include <memory>
 #include <list>
 #include <utility>
 #include <array>
@@ -19,7 +18,7 @@ class RenderObject
 {
 private:
     GLuint vao = UINT_MAX, vbo = UINT_MAX;
-    std::shared_ptr<Texture> texture;
+    Texture* texture = nullptr;
     ShaderBase* shader = nullptr;
 
     int width = 0, height = 0;
@@ -35,7 +34,7 @@ public:
     KAKERA_DISABLE_COPY(RenderObject);
     KAKERA_ENABLE_MOVE(RenderObject);
 
-    void set_texture(std::shared_ptr<Texture> texture);
+    void set_texture(Texture* texture);
 
     void set_shader(ShaderBase* shader);
 

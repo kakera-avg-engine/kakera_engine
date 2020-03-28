@@ -40,17 +40,17 @@ private:
     void create_file_index();
 public:
     Package() = default;
-    Package(const char* src);
+    Package(std::string src);
     ~Package();
 
     KAKERA_DISABLE_COPY(Package);
     KAKERA_ENABLE_MOVE(Package);
 
-    void open(const char* src);
+    void open(std::string src);
     void close();
 
-    std::optional<File> get_file(const char* filename);
-    std::optional<File> operator[](const char* filename);
+    std::optional<File> get_file(std::string filename);
+    std::optional<File> operator[](std::string filename);
 };
 
 #endif // !KAKERA_ENGINE_PACKAGE

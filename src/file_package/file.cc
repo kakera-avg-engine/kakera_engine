@@ -20,7 +20,7 @@ File& File::operator=(File&& other)
 
 File::File(size_t size, char* file_ptr)
 {
-    this->size = size;
+    this->_size = size;
     this->file_ptr = std::unique_ptr<char>(file_ptr);
 }
 

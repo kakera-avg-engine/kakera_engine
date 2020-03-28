@@ -10,6 +10,7 @@
 #include <iterator>
 #include <stack>
 #include <vector>
+#include "../graphic/texture_manager.h"
 #include "component_base.hpp"
 #include "../graphic/shader_normal.hpp"
 #include "../copy_and_move.inc"
@@ -40,6 +41,7 @@ private:
         bool for_each(pugi::xml_node& node) override;
     };
 #endif
+    std::string uuid;
 
     GLuint fbo = UINT_MAX, rbo = UINT_MAX;
     std::unique_ptr<RenderObject> render_obj;

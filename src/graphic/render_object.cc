@@ -41,7 +41,7 @@ RenderObject::RenderObject(RenderObject&& other)
 {
     vao = other.vao;
     vbo = other.vbo;
-    texture = std::move(other.texture);
+    texture = other.texture;
     shader = other.shader;
     width = other.width;
     height = other.height;
@@ -54,6 +54,7 @@ RenderObject::RenderObject(RenderObject&& other)
 
     other.vao = UINT_MAX;
     other.vbo = UINT_MAX;
+    other.texture = nullptr;
     other.shader = nullptr;
     other.width = 0;
     other.height = 0;
@@ -76,7 +77,7 @@ RenderObject& RenderObject::operator=(RenderObject&& other)
     if (&other != this) {
         vao = other.vao;
         vbo = other.vbo;
-        texture = std::move(other.texture);
+        texture = other.texture;
         shader = other.shader;
         width = other.width;
         height = other.height;
@@ -89,6 +90,7 @@ RenderObject& RenderObject::operator=(RenderObject&& other)
 
         other.vao = UINT_MAX;
         other.vbo = UINT_MAX;
+        other.texture = nullptr;
         other.shader = nullptr;
         other.width = 0;
         other.height = 0;
@@ -103,9 +105,9 @@ RenderObject& RenderObject::operator=(RenderObject&& other)
     return *this;
 }
 
-void RenderObject::set_texture(std::shared_ptr<Texture> texture)
+void RenderObject::set_texture(Texture* texture)
 {
-    this->texture.swap(texture);
+    this->texture = texture;
 }
 
 void RenderObject::set_shader(ShaderBase* shader)
@@ -168,7 +170,7 @@ void RenderObject::cancel_attach_color()
 
 Texture* RenderObject::get_texture()
 {
-    return texture.get();
+    return texture;
 }
 
 void RenderObject::render()

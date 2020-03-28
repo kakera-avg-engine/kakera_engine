@@ -11,7 +11,7 @@ void Package::create_file_index()
 #endif
 }
 
-Package::Package(const char* src)
+Package::Package(std::string src)
 {
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   ifdef _WIN32
@@ -38,7 +38,8 @@ Package::Package(Package&& other)
 #   endif
 #else
     // Debug
-    root_path == std::move(other.root_path);
+    root_path = other.root_path;
+    other.root_path = std::filesystem::path();
 #endif
 }
 
@@ -64,14 +65,15 @@ Package& Package::operator=(Package&& other)
 #   endif
 #else
         // Debug
-        root_path == std::move(other.root_path);
+        root_path = other.root_path;
+        other.root_path = std::filesystem::path();
 #endif
     }
 
     return *this;
 }
 
-void Package::open(const char* src)
+void Package::open(std::string src)
 {
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   ifdef _WIN32
@@ -83,10 +85,17 @@ void Package::open(const char* src)
     // Debug
     if (root_path.empty()) {
         std::filesystem::path path(src);
-        if (!std::filesystem::exists(path)) KAKERA_LOG(LogLevel::Fatal, "No such directory found.");
-        if (!std::filesystem::is_directory(path)) KAKERA_LOG(LogLevel::Fatal, "Given path:\"{}\" is not a directory.", src);
+
+        if (!std::filesystem::exists(path))
+            KAKERA_LOG(LogLevel::Fatal, "No such directory found.");
+
+        if (!std::filesystem::is_directory(path))
+            KAKERA_LOG(LogLevel::Fatal, "Given path:\"{}\" is not a directory.", src);
+
         root_path = path;
     }
+    else
+        KAKERA_LOG(LogLevel::Error, "Cannot open an opened package.");
 #endif
 }
 
@@ -104,7 +113,7 @@ void Package::close()
 #endif
 }
 
-std::optional<File> Package::get_file(const char* filename)
+std::optional<File> Package::get_file(std::string filename)
 {
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   ifdef _WIN32
@@ -140,7 +149,7 @@ std::optional<File> Package::get_file(const char* filename)
 #endif
 }
 
-std::optional<File> Package::operator[](const char* filename)
+std::optional<File> Package::operator[](std::string filename)
 {
     return get_file(filename);
 }
