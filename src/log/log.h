@@ -14,6 +14,7 @@
 #ifdef _WIN32
 #   include <process.h>
 #endif
+#include "glad/glad.h"
 #include "../copy_and_move.inc"
 #include "../version.inc"
 
@@ -40,6 +41,7 @@ private:
 
     static std::string now_time();
 public:
+    void get_hardware_info();
     void print(LogLevel level, std::string what, std::string file, int line);
 
     static Log& get();

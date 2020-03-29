@@ -1,38 +1,48 @@
 #include "render_object.h"
 
-RenderObject::RenderObject(bool upside_down)
+TextureView RenderObject::normal_view = GLVertices({
+    0.0f, 1.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 0.0f
+});
+
+TextureView RenderObject::upside_down_view = GLVertices({
+    0.0f, 0.0f, 1.0f, 1.0f,
+    0.0f, 1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 1.0f, 1.0f
+});
+
+GLVertices RenderObject::method_to_vertices(TextureApplyMethod method)
 {
-    std::array<GLfloat, 24> vertices;
-    if (upside_down) {
-        vertices = {
-            0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 0.0f, 0.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 1.0f, 1.0f
-        };
-    }
-    else {
-        vertices = {
-            0.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 0.0f, 1.0f, 0.0f
-        };
-    }
+    // TODO
+    return GLVertices({
+        0.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f
+    });
+}
+
+RenderObject::RenderObject()
+{
+    GLVertices vertices = {
+        0.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f
+    };
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 24, nullptr, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat) * 12, vertices.data());
 
     glBindVertexArray(vao);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 2, (void*)(sizeof(GLfloat) * 12));
+
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -105,9 +115,21 @@ RenderObject& RenderObject::operator=(RenderObject&& other)
     return *this;
 }
 
-void RenderObject::set_texture(Texture* texture)
+void RenderObject::set_texture(Texture* texture, TextureView texture_view)
 {
     this->texture = texture;
+    
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    if (auto vertices = std::get_if<GLVertices>(&texture_view)) 
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, sizeof(GLfloat) * 12, vertices->data());
+    else {
+        TextureApplyMethod method = std::get<TextureApplyMethod>(texture_view);
+        GLVertices tex_coord = method_to_vertices(method);
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 12, sizeof(GLfloat) * 12, tex_coord.data());
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void RenderObject::set_shader(ShaderBase* shader)

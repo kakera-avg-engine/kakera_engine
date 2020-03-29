@@ -41,7 +41,7 @@ private:
         bool for_each(pugi::xml_node& node) override;
     };
 #endif
-    std::string uuid;
+    std::string id;
 
     GLuint fbo = UINT_MAX, rbo = UINT_MAX;
     std::unique_ptr<RenderObject> render_obj;
@@ -54,7 +54,7 @@ private:
     void refresh_cache();
 public:
     Page(PageDisplayMode mode = PageDisplayMode::Unique);
-    Page(std::string src);
+    Page(std::string src, std::string id);
     ~Page();
 
     KAKERA_DISABLE_COPY(Page);

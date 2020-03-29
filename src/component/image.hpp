@@ -19,7 +19,7 @@ public:
 
     Image()
     {
-        render_obj = std::make_unique<RenderObject>(false);
+        render_obj = std::make_unique<RenderObject>();
         render_obj->set_shader(&KAKERA_SHADER_NORMAL);
     }
 
@@ -88,7 +88,7 @@ public:
                 if (image_surface) {
                     TextureFormat format = TextureFormat::rgb;
                     if (image_surface->format->BytesPerPixel == 4)
-                        format == TextureFormat::rgba;
+                        format = TextureFormat::rgba;
                     KAKERA_TEXTURE_MANAGER.set_texture(src, Texture(image_surface->w, image_surface->h, format));
                     texture = KAKERA_TEXTURE_MANAGER[src];
                     texture->update_pixels((unsigned char*)image_surface->pixels);

@@ -11,9 +11,6 @@ PageDisplayMode int_to_display_mode(int mode_int)
 #if (defined(_DEBUG) || !defined(NDEBUG))
 bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
 {
-    if (node_name_is("KakeraPage"))
-        page->uuid = node.attribute("uuid").as_string();
-
     if (node_name_is("DisplayMode")) {
         if (strcmp(node.child_value(), "unique") == 0) page->mode = PageDisplayMode::Unique;
         else if (strcmp(node.child_value(), "shared") == 0) page->mode = PageDisplayMode::Shared;
@@ -81,8 +78,9 @@ Page::Page(PageDisplayMode mode)
     this->mode = mode;
 }
 
-Page::Page(std::string src)
+Page::Page(std::string src, std::string id)
 {
+    this->id = id;
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #else
     pugi::xml_document doc;
@@ -112,7 +110,7 @@ void Page::resize(int width, int height)
 {
     root.set_size(width, height);
 
-    render_obj.reset(new RenderObject(true));
+    render_obj.reset(new RenderObject());
     render_obj->set_size(width, height);
     render_obj->set_shader(&KAKERA_SHADER_NORMAL);
 
@@ -120,11 +118,11 @@ void Page::resize(int width, int height)
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    KAKERA_TEXTURE_MANAGER.destroy_texture(uuid);
-    KAKERA_TEXTURE_MANAGER.set_texture(uuid, Texture(width, height));
-    Texture* color_attachment = KAKERA_TEXTURE_MANAGER[uuid];
+    KAKERA_TEXTURE_MANAGER.destroy_texture(id);
+    KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(width, height));
+    Texture* color_attachment = KAKERA_TEXTURE_MANAGER[id];
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment->get_id(), 0);
-    render_obj->set_texture(color_attachment);
+    render_obj->set_texture(color_attachment, RenderObject::upside_down_view);
 
     if (glIsRenderbuffer(rbo)) glDeleteRenderbuffers(1, &rbo);
     glGenRenderbuffers(1, &rbo);

@@ -17,12 +17,13 @@ protected:
     void compile(const char* frag_code)
     {
         const char* vertex_code = "#version 430 core\n" \
-            "layout (location = 0) in vec4 vertex;" \
+            "layout (location = 0) in vec2 vertex;" \
+            "layout (location = 1) in vec2 tex_coord;" \
             "out vec2 tex_coords;" \
             "uniform mat4 model;" \
             "uniform mat4 projection;" \
             "void main() {" \
-            "tex_coords = vertex.zw;" \
+            "tex_coords = tex_coord;" \
             "gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);}";
 
         unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);

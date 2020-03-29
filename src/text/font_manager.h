@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
+#include "ft2build.h"
+#include FT_FREETYPE_H
 #include "font.h"
 #include "../copy_and_move.inc"
 
@@ -12,6 +14,7 @@
 class FontManager
 {
 private:
+    FT_Library ft_lib = nullptr;
     std::unordered_map<std::string, std::unique_ptr<Font>> fonts;
 
     FontManager();

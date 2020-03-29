@@ -27,6 +27,11 @@ Log::Log()
 
     log_file << fmt::format("Kakera AVG Engine Version {0}.{1} {2}\n", VERSION_MAJOR, VERSION_MINOR, VERSION_NAME);
     log_file << fmt::format("Log create on {0} UTC\n", time_string);
+
+#if (defined(_DEBUG) || !defined(NDEBUG))
+    fmt::print("Kakera AVG Engine Version {0}.{1} {2}\n", VERSION_MAJOR, VERSION_MINOR, VERSION_NAME);
+    fmt::print("Log create on {0} UTC\n", time_string);
+#endif
 }
 
 Log::~Log()
@@ -40,6 +45,26 @@ std::string Log::now_time()
     char buffer[32];
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", std::gmtime(&now));
     return std::string(buffer);
+}
+
+void Log::get_hardware_info()
+{
+    std::string vendor = (char*)glGetString(GL_VENDOR);
+    std::string device = (char*)glGetString(GL_RENDERER);
+    std::string version = (char*)glGetString(GL_VERSION);
+
+    std::string text = fmt::format(
+        "\nDevice Information:\n"
+        "    Graphics card vendor: {0}\n"
+        "    Graphics card model: {1}\n"
+        "    OpenGL version: {2}\n\n",
+        vendor, device, version);
+
+    log_file << text;
+
+#if (defined(_DEBUG) || !defined(NDEBUG))
+    fmt::print("{}", text);
+#endif
 }
 
 void Log::print(LogLevel level, std::string what, std::string file, int line)

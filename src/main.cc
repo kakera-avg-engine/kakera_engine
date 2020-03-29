@@ -39,6 +39,14 @@ void load_config(Window& window)
     std::string debug_root_dir = root.child_value("DebugRootDir");
     debug_root_dir += "/";
 
+    pugi::xml_node packages = root.child("Packages");
+    for (auto& package : packages) {
+        std::string id = package.attribute("id").as_string();
+        std::string src = package.attribute("src").as_string();
+        src = debug_root_dir + src;
+        KAKERA_PACKAGE_MANAGER.add_package(id, Package(src));
+    }
+
     pugi::xml_node window_configs = root.child("Window");
 
     int width = window_configs.child("Size").attribute("width").as_int();
@@ -49,19 +57,16 @@ void load_config(Window& window)
     window.set_title(title);
 
     std::string icon = window_configs.child_value("Icon");
-    if (icon != "none") {
-        icon = debug_root_dir + icon;
-        SDL_Surface* icon_surface = IMG_Load(icon.c_str());
-        window.set_icon(icon_surface);
-        SDL_FreeSurface(icon_surface);
-    }
-
-    pugi::xml_node packages = root.child("Packages");
-    for (auto& package : packages) {
-        std::string id = package.attribute("id").as_string();
-        std::string src = package.attribute("src").as_string();
-        src = debug_root_dir + src;
-        KAKERA_PACKAGE_MANAGER.add_package(id, Package(src));
+    if (!icon.empty() && icon != "none") {
+        auto icon_file = KAKERA_PACKAGE_MANAGER.get_file(icon);
+        if (icon_file.has_value()) {
+            File file = std::move(icon_file.value());
+            SDL_RWops* sdl_file = SDL_RWFromMem(*file, file.size());
+            SDL_Surface* icon_surface = IMG_Load_RW(sdl_file, 1);
+            if (icon_surface)
+                window.set_icon(icon_surface);
+            SDL_FreeSurface(icon_surface);
+        }
     }
 
     pugi::xml_node pages = root.child("Pages");
@@ -69,7 +74,7 @@ void load_config(Window& window)
         std::string id = page.attribute("id").as_string();
         std::string src = page.attribute("src").as_string();
         src = debug_root_dir + src;
-        window.pages.try_emplace(id, std::make_unique<Page>(src));
+        window.pages.try_emplace(id, std::make_unique<Page>(src, id));
         if (page.attribute("default").as_bool()) window.start_page(id);
     }
 #endif
@@ -114,6 +119,9 @@ int main(int argc, char* argv[])
     }
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Get hardware info.
+    Log::get().get_hardware_info();
 
     // Load config file
     load_config(main_window);

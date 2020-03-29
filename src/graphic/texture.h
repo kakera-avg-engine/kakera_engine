@@ -2,7 +2,10 @@
 #define KAKERA_ENGINE_GRAPHIC_TEXTURE
 
 #include "glad/glad.h"
+#include "SDL.h"
+#include <array>
 #include <climits>
+#include "../log/log.h"
 #include "../copy_and_move.inc"
 
 enum class TextureFormat
@@ -29,6 +32,8 @@ public:
     void update_pixels(int x, int y, int width, int height, unsigned char* pixels);
 
     const GLuint get_id();
+
+    std::array<GLfloat, 12> get_area_coord(SDL_Rect rect);
 
     void bind();
 };

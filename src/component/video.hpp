@@ -22,7 +22,7 @@ private:
 public:
     Video()
     {
-        render_obj = std::make_unique<RenderObject>(false);
+        render_obj = std::make_unique<RenderObject>();
         render_obj->set_shader(&KAKERA_SHADER_NORMAL);
     }
 

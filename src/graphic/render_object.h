@@ -7,12 +7,23 @@
 #include <utility>
 #include <array>
 #include <climits>
+#include <variant>
 #include "glad/glad.h"
 #include "SDL.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "../copy_and_move.inc"
+
+enum class TextureApplyMethod
+{
+    Repeat,
+    Tile
+};
+
+using GLVertices = std::array<GLfloat, 12>;
+
+using TextureView = std::variant<GLVertices, TextureApplyMethod>;
 
 class RenderObject
 {
@@ -27,14 +38,19 @@ private:
     uint8_t opacity = 255;
     bool is_attach_color = false;
     SDL_Color attached_color = { 0, 0, 0, 0 };
+
+    GLVertices method_to_vertices(TextureApplyMethod method);
 public:
-    RenderObject(bool upside_down = false);
+    static TextureView normal_view;
+    static TextureView upside_down_view;
+
+    RenderObject();
     ~RenderObject();
 
     KAKERA_DISABLE_COPY(RenderObject);
     KAKERA_ENABLE_MOVE(RenderObject);
 
-    void set_texture(Texture* texture);
+    void set_texture(Texture* texture, TextureView texture_view = normal_view);
 
     void set_shader(ShaderBase* shader);
 
