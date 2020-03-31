@@ -120,7 +120,7 @@ void Log::print(LogLevel level, std::string what, std::string file, int line)
     log_file << format_str;
 
 #if (defined(_DEBUG) || !defined(NDEBUG))
-    fmt::print(format_str);
+    fmt::print("{}", format_str);
 #endif
 
     if (level == LogLevel::Fatal) std::abort();

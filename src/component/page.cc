@@ -61,9 +61,33 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
             sl_text->set_fontsize(node.attribute("font-size").as_int());
             sl_text->set_color(node.attribute("color").as_string());
             std::string str = node.child_value();
-            StringTrim::trim(str);
+            StringTools::trim(str);
             sl_text->set_string(str);
             sl_text->set_spacing(node.attribute("spacing").as_int());
+        }
+
+        if (node_name_is("MultiLineText")) {
+            parent->children.emplace_back(std::make_unique<MultiLineText>());
+            parent->children.back()->parent = parent;
+
+            MultiLineText* ml_text = (MultiLineText*)parent->children.back().get();
+            ml_text->set_uuid(node.attribute("uuid").as_string());
+            int w, h, x, y;
+            w = node.attribute("width").as_int();
+            h = node.attribute("height").as_int();
+            x = node.attribute("x").as_int();
+            y = node.attribute("y").as_int();
+            ml_text->set_size(w, h);
+            ml_text->set_position(x, y);
+            ml_text->set_font(node.attribute("font").as_string());
+            ml_text->set_fontsize(node.attribute("font-size").as_int());
+            ml_text->set_color(node.attribute("color").as_string());
+            std::string str = node.text().as_string();
+            StringTools::trim(str);
+            str += "\n";
+            StringTools::trim_multi_line(str);
+            ml_text->set_string(str);
+            ml_text->set_spacing(node.attribute("spacing").as_int());
         }
     }
 

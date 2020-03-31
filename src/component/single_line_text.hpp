@@ -1,16 +1,10 @@
 #ifndef KAKERA_ENGINE_COMPONENT_SINGLE_LINE_TEXT
 #define KAKERA_ENGINE_COMPONENT_SINGLE_LINE_TEXT
 
-#ifdef _WIN32
-#   define WIN32_LEAN_AND_MEAN
-#   include <Windows.h>
-#endif // !_WIN32
-
-#include "fmt/format.h"
-
 #include "component_base.hpp"
 #include "../text/font_manager.h"
 #include "../text/word.h"
+#include "../string_tools.hpp"
 #include <string>
 #include <memory>
 #include <list>
@@ -36,25 +30,6 @@ private:
 
         return result;
     }
-
-    static std::wstring utf8_to_unicode(std::string utf8_str)
-    {
-        std::wstring result;
-#ifdef _WIN32
-        int size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_str.data(), utf8_str.length(), nullptr, 0);
-
-        result.resize(size);
-
-        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8_str.data(), utf8_str.length(), &result[0], size);
-#endif
-        return result;
-    }
-
-    static bool is_alphabet(wchar_t ch)
-    {
-        return is_in_range(ch, L'\u0001', L'\u024f') || // Latin
-               is_in_range(ch, L'\u0370', L'\u052f') ;  // Greek & Cyrillic
-    }
 public:
     SingleLineText() = default;
 
@@ -64,7 +39,7 @@ public:
         set_string(str);
     }
 
-    SingleLineText(SingleLineText&& other)
+    SingleLineText(SingleLineText&& other) noexcept
     {
         font = other.font;
         color = other.color;
@@ -79,7 +54,7 @@ public:
         font = nullptr;
     }
 
-    SingleLineText& operator=(SingleLineText&& other)
+    SingleLineText& operator=(SingleLineText&& other) noexcept
     {
         if (this != &other) {
             font = other.font;
@@ -93,9 +68,8 @@ public:
         return *this;
     }
 
-    void set_string(std::string str)
+    void set_string(std::wstring unicode_str)
     {
-        std::wstring unicode_str = utf8_to_unicode(str);
         std::wstring temp;
         auto str_ptr = unicode_str.c_str();
         bool ruby_exp = false;
@@ -123,7 +97,7 @@ public:
 
             // Not ruby expression
             if (!ruby_exp) {
-                if (is_alphabet(ch) && ch != L'\u0020') {
+                if (StringTools::is_alphabet(ch) && ch != L'\u0020') {
                     temp += ch;
                 }
                 else if (ch == L'\u0020' || ch == L'\u0000') {
@@ -143,13 +117,23 @@ public:
             }
         }
 
+        // Calculate size
+        bool height_resized = false;
         for (auto& word : words) {
-            if (word->has_ruby()) {
+            if (word->has_ruby() && !height_resized) {
                 this->height += this->height / Word::RUBY_SIZE_BASE;
                 this->height += this->height / Word::RUBY_LINE_SPACING_BASE;
-                break;
+                height_resized = true;
             }
+
+            this->width += word->get_width();
         }
+    }
+
+    void set_string(std::string str)
+    {
+        std::wstring unicode_str = StringTools::utf8_to_unicode(str);
+        set_string(unicode_str);
     }
 
     void set_color(std::string color)
@@ -169,20 +153,15 @@ public:
         font = KAKERA_FONT_MANAGER[font_id];
     }
 
+    void set_font(Font* font) {
+        this->font = font;
+    }
+
     void set_spacing(int spacing)
     {
         for (auto& word : words) {
             word->set_spacing(spacing);
         }
-    }
-
-    int get_width()
-    {
-        int result = 0;
-        for (auto& word : words)
-            result += word->get_width();
-        
-        return result;
     }
 
     void render() override

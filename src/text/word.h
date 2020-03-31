@@ -27,11 +27,13 @@ private:
 
     std::unique_ptr<Word> ruby;
 public:
+    Word() = default;
     Word(Font* font, int font_size, std::wstring word);
     Word(Font* font, int font_size, std::wstring word, std::wstring ruby);
     ~Word() = default;
 
     bool has_ruby();
+    bool empty(); // empty word stants for line breaker
 
     void set_spacing(int spacing);
 
@@ -43,6 +45,7 @@ public:
     void render(int x, int y, int origin, SDL_Color color); // return last advance
 
     static constexpr int RUBY_SIZE_BASE = 2;
+    static constexpr int LINE_SPACING_BASE = 4;
     static constexpr int RUBY_LINE_SPACING_BASE = 8;
 };
 

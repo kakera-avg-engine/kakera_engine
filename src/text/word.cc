@@ -44,6 +44,11 @@ bool Word::has_ruby()
     return ruby != nullptr;
 }
 
+bool Word::empty()
+{
+    return this == nullptr;
+}
+
 void Word::set_spacing(int spacing)
 {
     this->spacing += spacing;
@@ -54,7 +59,7 @@ void Word::set_spacing(int spacing)
 
 int Word::get_width()
 {
-    if (word.empty())
+    if (empty())
         return 0;
 
     int result = 0;
@@ -67,7 +72,7 @@ int Word::get_width()
 
 int Word::get_bearing_y()
 {
-    if (word.empty())
+    if (empty())
         return 0;
 
     int result = 0;
@@ -95,6 +100,7 @@ void Word::render(int x, int y, int origin, SDL_Color color)
     }
     
     x += offset;
+
     for (int i = 0; i < word.size(); i++) {
         Glyph glyph = word[i];
         RenderObject* render_obj = word_render_objs[i].get();
@@ -107,6 +113,7 @@ void Word::render(int x, int y, int origin, SDL_Color color)
 
         render_obj->render();
 
+        x -= glyph.bearing_x;
         x += (glyph.advance + spacing);
         y = raw_y;
     }

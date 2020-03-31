@@ -14,7 +14,7 @@
 #include "../graphic/texture_manager.h"
 #include "component_base.hpp"
 #include "../graphic/shader_normal.hpp"
-#include "../string_trim.hpp"
+#include "../string_tools.hpp"
 #include "../copy_and_move.inc"
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   include "msgpack.hpp"
@@ -25,6 +25,7 @@
 
 #include "image.hpp"
 #include "single_line_text.hpp"
+#include "multi_line_text.hpp"
 
 enum class PageDisplayMode
 {
