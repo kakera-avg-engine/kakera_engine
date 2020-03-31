@@ -43,6 +43,11 @@ std::optional<File> PackageManager::get_file(std::string src)
     return package->get_file(file_path);
 }
 
+void PackageManager::add_persistent_file(File&& file)
+{
+    persistent_files.emplace_back(std::make_unique<File>(std::move(file)));
+}
+
 PackageManager& PackageManager::get()
 {
     static PackageManager instance;

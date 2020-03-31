@@ -23,6 +23,7 @@ extern "C"
 #include "component/window.h"
 #include "log/log.h"
 #include "file_package/package_manager.h"
+#include "text/font_manager.h"
 
 void load_config(Window& window)
 {
@@ -45,6 +46,13 @@ void load_config(Window& window)
         std::string src = package.attribute("src").as_string();
         src = debug_root_dir + src;
         KAKERA_PACKAGE_MANAGER.add_package(id, Package(src));
+    }
+
+    pugi::xml_node fonts = root.child("Fonts");
+    for (auto& font : fonts) {
+        std::string id = font.attribute("id").as_string();
+        std::string src = font.attribute("src").as_string();
+        KAKERA_FONT_MANAGER.set_font(id, src);
     }
 
     pugi::xml_node window_configs = root.child("Window");
@@ -121,7 +129,7 @@ int main(int argc, char* argv[])
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Get hardware info.
-    Log::get().get_hardware_info();
+    Log::get().get_system_info();
 
     // Load config file
     load_config(main_window);

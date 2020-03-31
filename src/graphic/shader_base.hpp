@@ -7,6 +7,9 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "glad/glad.h"
 #include "../copy_and_move.inc"
+#if (defined(_DEBUG) || !defined(NDEBUG))
+#   include "../log/log.h"
+#endif
 
 class ShaderBase
 {
@@ -24,7 +27,7 @@ protected:
             "uniform mat4 projection;" \
             "void main() {" \
             "tex_coords = tex_coord;" \
-            "gl_Position = projection * model * vec4(vertex.xy, 0.0, 1.0);}";
+            "gl_Position = projection * model * vec4(vertex, 0.0, 1.0);}";
 
         unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
         unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -33,12 +36,51 @@ protected:
         glShaderSource(fragment_shader, 1, &frag_code, NULL);
 
         glCompileShader(vertex_shader);
+#if (defined(_DEBUG) || !defined(NDEBUG))
+        {
+            int success;
+            char info_log[512];
+            glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                glGetShaderInfoLog(vertex_shader, 512, NULL, info_log);
+                KAKERA_LOG(LogLevel::Error, "Vertex shader compilation failed: {}", info_log);
+            }
+            else
+                KAKERA_LOG(LogLevel::Debug, "Vertex shader compiled successfully.");
+        }
+#endif
         glCompileShader(fragment_shader);
+#if (defined(_DEBUG) || !defined(NDEBUG))
+        {
+            int success;
+            char info_log[512];
+            glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
+            if (!success) {
+                glGetShaderInfoLog(fragment_shader, 512, NULL, info_log);
+                KAKERA_LOG(LogLevel::Error, "Fragment shader compilation failed: {}", info_log);
+            }
+            else
+                KAKERA_LOG(LogLevel::Debug, "Fragment shader compiled successfully.");
+        }
+#endif
 
         program = glCreateProgram();
         glAttachShader(program, vertex_shader);
         glAttachShader(program, fragment_shader);
         glLinkProgram(program);
+#if (defined(_DEBUG) || !defined(NDEBUG))
+        {
+            int success;
+            char info_log[512];
+            glGetProgramiv(program, GL_LINK_STATUS, &success);
+            if (!success) {
+                glGetProgramInfoLog(program, 512, NULL, info_log);
+                KAKERA_LOG(LogLevel::Error, "Shader program linking failed: {}", info_log);
+            }
+            else
+                KAKERA_LOG(LogLevel::Debug, "Shader program linked successfully.");
+        }
+#endif
 
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);

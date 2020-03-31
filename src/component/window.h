@@ -12,6 +12,8 @@
 #include "../graphic/shader_text.hpp"
 #include "../copy_and_move.inc"
 
+#include "../text/font_manager.h"
+
 class Window
 {
 private:

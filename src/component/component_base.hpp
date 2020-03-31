@@ -55,8 +55,8 @@ public:
     virtual void render() {};
 };
 
-using Root = Component;
-
 // Root type id = 0
+
+using Root = Component;
 
 #endif // !KAKERA_ENGINE_COMPONENT_BASE

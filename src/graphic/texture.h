@@ -36,6 +36,8 @@ public:
     std::array<GLfloat, 12> get_area_coord(SDL_Rect rect);
 
     void bind();
+
+    static void unbind();
 };
 
 #endif // !KAKERA_ENGINE_GRAPHIC_TEXTURE

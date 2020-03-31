@@ -10,18 +10,18 @@ class NormalShader : public ShaderBase
 private:
     NormalShader()
     {
-        const char* fragment = "#version 430 core\n" \
-            "out vec4 frag_color;" \
-            "in vec2 tex_coords;" \
-            "uniform sampler2D image;" \
-            "uniform vec3 attached_color;" \
-            "uniform bool is_attach = false;" \
-            "uniform float opacity = 1.0;" \
-            "void main() {" \
-            "if (is_attach) {" \
-            "frag_color = vec4(attached_color, opacity) * texture(image, tex_coords);" \
-            "} else {" \
-            "frag_color = vec4(1.0, 1.0, 1.0, opacity) * texture(image, tex_coords);}}";
+        const char* fragment = "#version 430 core\n"
+            "out vec4 frag_color;"
+            "in vec2 tex_coords;"
+            "uniform sampler2D image;"
+            "uniform vec3 attached_color;"
+            "uniform bool is_attach = false;"
+            "uniform float opacity = 1.0;"
+            "void main() {"
+            "if (is_attach) {"
+            "frag_color = vec4(attached_color, opacity) * texture2D(image, tex_coords);"
+            "} else {"
+            "frag_color = vec4(1.0, 1.0, 1.0, opacity) * texture2D(image, tex_coords);}}";
 
         compile(fragment);
     }
@@ -36,7 +36,7 @@ public:
 
     void use() override
     {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 0);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
         ShaderBase::use();
     }
 

@@ -72,6 +72,7 @@ void Window::run()
         }
         glViewport(0, 0, w, h);
         KAKERA_SHADER_NORMAL.set_projection(w, h);
+        KAKERA_SHADER_TEXT.set_projection(w, h);
     }
 
     SDL_SetWindowPosition(window_ptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);

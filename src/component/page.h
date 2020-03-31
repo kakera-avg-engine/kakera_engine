@@ -10,9 +10,11 @@
 #include <iterator>
 #include <stack>
 #include <vector>
+#include <regex>
 #include "../graphic/texture_manager.h"
 #include "component_base.hpp"
 #include "../graphic/shader_normal.hpp"
+#include "../string_trim.hpp"
 #include "../copy_and_move.inc"
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   include "msgpack.hpp"
@@ -22,6 +24,7 @@
 #endif
 
 #include "image.hpp"
+#include "single_line_text.hpp"
 
 enum class PageDisplayMode
 {

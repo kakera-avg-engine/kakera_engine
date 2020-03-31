@@ -1,5 +1,5 @@
 #include "texture.h"
-
+#include <iostream>
 Texture::Texture(int width, int height, TextureFormat format)
 {
     w = width;
@@ -69,6 +69,7 @@ void Texture::update_pixels(int x, int y, int width, int height, unsigned char* 
 {
     glBindTexture(GL_TEXTURE_2D, tex_id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, gl_format, GL_UNSIGNED_BYTE, pixels);
+    return;
 }
 
 const GLuint Texture::get_id()
@@ -84,11 +85,11 @@ std::array<GLfloat, 12> Texture::get_area_coord(SDL_Rect rect)
     }
 
     GLfloat left_x, right_x, top_y, bottom_y;
-
+    
     left_x = (GLfloat)rect.x / (GLfloat)w;
     right_x = (GLfloat)(rect.x + rect.w) / (GLfloat)w;
-    top_y = (GLfloat)(h - rect.y) / (GLfloat)h;
-    bottom_y = (GLfloat)(h - rect.y - rect.h) / (GLfloat)h;
+    top_y = (GLfloat)(rect.y + rect.h) / (GLfloat)h;
+    bottom_y = (GLfloat)rect.y / (GLfloat)h;
 
     std::array<GLfloat, 12> result = {
         left_x, top_y, right_x, bottom_y,
@@ -102,4 +103,9 @@ std::array<GLfloat, 12> Texture::get_area_coord(SDL_Rect rect)
 void Texture::bind()
 {
     glBindTexture(GL_TEXTURE_2D, tex_id);
+}
+
+void Texture::unbind()
+{
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

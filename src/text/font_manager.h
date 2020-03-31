@@ -23,7 +23,7 @@ public:
     KAKERA_DISABLE_COPY(FontManager);
     KAKERA_DISABLE_MOVE(FontManager);
 
-    void set_font();
+    void set_font(std::string id, std::string src);
     Font* get_font(std::string id);
     Font* operator[](std::string id);
 

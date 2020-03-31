@@ -218,7 +218,8 @@ void RenderObject::render()
 
     shader->set_model(model);
 
-    if (is_attach_color) shader->attach_color(attached_color);
+    if (is_attach_color)
+        shader->attach_color(attached_color);
 
     shader->set_opacity(opacity);
 

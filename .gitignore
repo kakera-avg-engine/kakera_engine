@@ -396,3 +396,4 @@ MigrationBackup/
 *.sln
 
 src/glad.c
+manifest.xml

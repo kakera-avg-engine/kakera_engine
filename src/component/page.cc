@@ -5,7 +5,7 @@
 PageDisplayMode int_to_display_mode(int mode_int)
 {
     if (mode_int == 0) return PageDisplayMode::Unique;
-    else if (mode_int == 1) return PageDisplayMode::Shared;
+    else return PageDisplayMode::Shared;
 }
 
 #if (defined(_DEBUG) || !defined(NDEBUG))
@@ -46,6 +46,24 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
             image->set_size(w, h);
             image->set_position(x, y);
             image->set_src(node.attribute("src").as_string());
+        }
+
+        if (node_name_is("SingleLineText")) {
+            parent->children.emplace_back(std::make_unique<SingleLineText>());
+            parent->children.back()->parent = parent;
+
+            SingleLineText* sl_text = (SingleLineText*)parent->children.back().get();
+            sl_text->set_uuid(node.attribute("uuid").as_string());
+            int x = node.attribute("x").as_int();
+            int y = node.attribute("y").as_int();
+            sl_text->set_position(x, y);
+            sl_text->set_font(node.attribute("font").as_string());
+            sl_text->set_fontsize(node.attribute("font-size").as_int());
+            sl_text->set_color(node.attribute("color").as_string());
+            std::string str = node.child_value();
+            StringTrim::trim(str);
+            sl_text->set_string(str);
+            sl_text->set_spacing(node.attribute("spacing").as_int());
         }
     }
 
