@@ -11,7 +11,7 @@
 #include "../graphic/shader_normal.hpp"
 #include "../graphic/shader_text.hpp"
 #include "../copy_and_move.inc"
-
+#include "../log/log.h"
 #include "../text/font_manager.h"
 
 class Window
@@ -22,6 +22,9 @@ private:
     SDL_sem* fps_sem = nullptr;
 
     std::vector<Page*> active_pages;
+
+    void resize_setting(int w, int h);
+    void event_executor(SDL_Event& event);
 public:
     std::unordered_map<std::string, std::unique_ptr<Page>> pages;
 

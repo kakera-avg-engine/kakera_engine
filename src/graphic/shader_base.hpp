@@ -1,6 +1,7 @@
 #ifndef KAKERA_ENGINE_GRAPHIC_SHADER_BASE
 #define KAKERA_ENGINE_GRAPHIC_SHADER_BASE
 
+#include <utility>
 #include "SDL.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -11,6 +12,8 @@
 class ShaderBase
 {
 protected:
+    int window_w = 0, window_h = 0;
+
     glm::mat4 projection;
     GLuint program;
 
@@ -46,6 +49,11 @@ protected:
 
     virtual ~ShaderBase() {};
 public:
+    std::pair<int, int> get_window_size()
+    {
+        return std::make_pair(window_w, window_h);
+    }
+
     virtual void use()
     {
         glUseProgram(program);
@@ -68,6 +76,8 @@ public:
 
     virtual void set_projection(int width, int height)
     {
+        window_w = width;
+        window_h = height;
         projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f, -1.0f, 1.0f);
     }
 

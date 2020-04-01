@@ -1,7 +1,9 @@
-#ifndef KAKERA_ENGINE_COMPONENT_MULTI_LINE_TEXT
-#define KAKERA_ENGINE_COMPONENT_MULTI_LINE_TEXT
+#ifndef KAKERA_ENGINE_COMPONENT_TEXT
+#define KAKERA_ENGINE_COMPONENT_TEXT
 
 #include "component_base.hpp"
+#include "../graphic/shader_normal.hpp"
+#include "glad/glad.h"
 #include "../text/font_manager.h"
 #include "../text/word.h"
 #include "../string_tools.hpp"
@@ -10,15 +12,18 @@
 #include <vector>
 #include <memory>
 
-// MultiLineText type id = 4
+// Text type id = 2
 
-class MultiLineText : public Component
+class Text : public Component
 {
 private:
     int font_size = 0;
     Font* font = nullptr;
-    SDL_Color color = { 0, 0, 0, 255 };
+    SDL_Color color = SDL_Color({ 0, 0, 0, 255 });
+    int word_spacing = 0;
     int line_spacing = 0;
+
+    bool is_scissor = false;
 
     struct Line
     {
@@ -28,12 +33,94 @@ private:
     };
 
     std::list<Line> lines;
-public:
-    MultiLineText() = default;
 
-    ~MultiLineText()
+    void real_render()
+    {
+        int word_x = x;
+        int word_y = y;
+        for (auto& line : lines) {
+            word_y += (line.height - font_size);
+
+            for (auto& word : line.words) {
+                word->render(word_x, word_y, line.origin, color);
+                word_x += (word->get_width() + word_spacing);
+            }
+
+            word_x = x;
+            word_y += font_size;
+            word_y += line_spacing;
+        }
+    }
+public:
+    Text() = default;
+    
+    Text(Text&& other) noexcept
+    {
+        width = other.width;
+        height = other.height;
+        x = other.x;
+        y = other.y;
+        uuid = other.uuid;
+        mouse_entered = other.mouse_entered;
+        font_size = other.font_size;
+        font = other.font;
+        color = other.color;
+        word_spacing = other.word_spacing;
+        line_spacing = other.line_spacing;
+        is_scissor = other.is_scissor;
+        lines = std::move(other.lines);
+
+        other.width = 0;
+        other.height = 0;
+        other.x = 0;
+        other.y = 0;
+        other.uuid = "";
+        other.mouse_entered = false;
+        other.font_size = 0;
+        other.font = nullptr;
+        other.color = SDL_Color({ 0, 0, 0, 255 });
+        other.word_spacing = 0;
+        other.line_spacing = 0;
+        other.is_scissor = false;
+    }
+
+    ~Text()
     {
         font = nullptr;
+    }
+
+    Text& operator=(Text&& other) noexcept
+    {
+        if (this != &other) {
+            width = other.width;
+            height = other.height;
+            x = other.x;
+            y = other.y;
+            uuid = other.uuid;
+            mouse_entered = other.mouse_entered;
+            font_size = other.font_size;
+            font = other.font;
+            color = other.color;
+            word_spacing = other.word_spacing;
+            line_spacing = other.line_spacing;
+            is_scissor = other.is_scissor;
+            lines = std::move(other.lines);
+
+            other.width = 0;
+            other.height = 0;
+            other.x = 0;
+            other.y = 0;
+            other.uuid = "";
+            other.mouse_entered = false;
+            other.font_size = 0;
+            other.font = nullptr;
+            other.color = SDL_Color({ 0, 0, 0, 255 });
+            other.word_spacing = 0;
+            other.line_spacing = 0;
+            other.is_scissor = false;
+        }
+
+        return *this;
     }
 
     void set_string(std::wstring unicode_str)
@@ -43,8 +130,7 @@ public:
         bool ruby_exp = false;
         std::vector<std::unique_ptr<Word>> words;
 
-        for (int i = 0; i <= unicode_str.size(); i++) {
-            wchar_t ch = str_ptr[i];
+        for (auto& ch : unicode_str) {
 
             // Ruby expression
             if (temp == L"[[") {
@@ -78,14 +164,7 @@ public:
                     words.emplace_back(std::make_unique<Word>(font, font_size, std::wstring(L"\u0020")));
                     temp.clear();
                 }
-                else if (ch == L'\u0000') {
-                    if (!temp.empty()) {
-                        words.emplace_back(std::make_unique<Word>(font, font_size, temp));
-                        temp.clear();
-                    }
-                    words.emplace_back(std::make_unique<Word>());
-                }
-                else if (ch == L'\u000a') {
+                else if (ch == L'\u000a' || ch == L'\u0000') {
                     if (!temp.empty()) {
                         words.emplace_back(std::make_unique<Word>(font, font_size, temp));
                         temp.clear();
@@ -93,6 +172,10 @@ public:
                     words.emplace_back(std::make_unique<Word>());
                 }
                 else {
+                    if (!temp.empty()) {
+                        words.emplace_back(std::make_unique<Word>(font, font_size, temp));
+                        temp.clear();
+                    }
                     temp = ch;
                     words.emplace_back(std::make_unique<Word>(font, font_size, temp));
                     temp.clear();
@@ -103,22 +186,21 @@ public:
         // Set lines
         bool height_resized = false;
         int temp_width = 0, temp_height = font_size;
-        int pos = 0;
-        for (int i = 0; i < words.size(); i++) {
+        int i = 0, pos = 0;
+
+        while (i < words.size()) {
             auto& word = words[i];
+            int word_width = word->get_width() + word_spacing;
 
-            if ((width != 0 && temp_width + word->get_width() > width) /* Over width */||
-                word->get_width() == 0 /* line breaker */) {
+            if ((width != 0 && (temp_width + word_width > width)) /* Over width */ ||
+                word_width == 0 /* line breaker*/) {
 
-                lines.emplace_back(Line());
-                auto& line = lines.back();
+                auto& line = lines.emplace_back(Line());
                 line.height = temp_height;
 
                 for (int j = pos; j < i; j++) {
-                    auto& line_word = words[j];
-                    line.words.emplace_back(std::move(line_word));
-
-                    if (int wby = line_word->get_bearing_y(); wby > line.origin)
+                    int wby = line.words.emplace_back(std::move(words[j]))->get_bearing_y();
+                    if (wby > line.origin)
                         line.origin = wby;
                 }
 
@@ -128,6 +210,10 @@ public:
                 }
 
                 pos = i;
+                temp_width = 0;
+
+                if(word_width == 0 || words[i + 1]->get_width() == 0)
+                    i++;
             }
             else {
                 if (word->has_ruby() && !height_resized) {
@@ -136,9 +222,12 @@ public:
                     height_resized = true;
                 }
 
-                temp_width += word->get_width();
+                temp_width += word_width;
+
+                i++;
             }
         }
+        
     }
 
     void set_string(std::string str)
@@ -165,28 +254,45 @@ public:
         font = KAKERA_FONT_MANAGER[font_id];
     }
 
-    void set_spacing(int spacing)
+    void set_line_spacing(int spacing)
     {
         line_spacing += spacing;
     }
 
+    void set_word_spacing(int spacing)
+    {
+        word_spacing += spacing;
+
+        for (auto& line : lines) {
+            for (auto& word : line.words) {
+                word->set_spacing(spacing);
+            }
+        }
+    }
+
+    void set_size(int w, int h) override
+    {
+        Component::set_size(w, h);
+
+        if (w > 0 && h > 0)
+            is_scissor = true;
+    }
+
     void render() override
     {
-        int word_x = x;
-        int word_y = y;
-        for (auto& line : lines) {
-            word_y += (line.height - font_size);
+        if (is_scissor) {
+            int gl_y = KAKERA_SHADER_NORMAL.get_window_size().second - y - height;
+            glEnable(GL_SCISSOR_TEST);
+            glScissor(x, gl_y, width, height);
 
-            for (auto& word : line.words) {
-                word->render(word_x, word_y, line.origin, color);
-                word_x += word->get_width();
-            }
+            real_render();
 
-            word_x = x;
-            word_y += font_size;
-            word_y += line_spacing;
+            glDisable(GL_SCISSOR_TEST);
+        }
+        else {
+            real_render();
         }
     }
 };
 
-#endif // !KAKERA_ENGINE_COMPONENT_MULTI_LINE_TEXT
+#endif // !KAKERA_ENGINE_COMPONENT_TEXT

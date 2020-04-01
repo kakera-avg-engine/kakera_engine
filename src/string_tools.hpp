@@ -4,7 +4,6 @@
 #include <string>
 #include <iterator>
 #include <vector>
-#include <regex>
 
 #define is_in_range(ch,min,max) (ch>=min&&ch<=max)
 
@@ -15,8 +14,8 @@
 
 class StringTools
 {
-public:
-    static void trim(std::string& str)
+private:
+    static void trim_single_line(std::string& str)
     {
         std::string::size_type pos = 0;
         for (auto iter = str.begin(); iter != str.end(); iter++) {
@@ -37,35 +36,49 @@ public:
         str.erase(str.length() - pos, pos + 1);
     }
 
-    static void trim_multi_line(std::string& str)
+    static bool is_all_space(std::string& str)
     {
-        std::regex pattern("<br\\s*/>");
-        str = std::regex_replace(str, pattern, "\n");
-        std::vector<std::string> lines;
-
-        std::string::size_type pos = 0;
-        for (int i = 0; i < str.length(); i++) {
-            if (str[i] == '\n') {
-                lines.push_back(str.substr(pos, i - pos));
-                pos = i;
+        bool result = true;
+        for (auto& ch : str) {
+            if (ch != ' ' && ch != '\n' && ch != '\t') {
+                result = false;
+                break;
             }
         }
 
-        for (auto& line : lines) {
-            std::string::size_type s_pos = 0;
-            for (auto iter = line.begin(); iter != line.end(); iter++) {
-                if (*iter != ' ' && *iter != '\n' && *iter != '\t' && s_pos == 0) {
-                    s_pos = std::distance(line.begin(), iter);
-                    break;
+        return result;
+    }
+public:
+    static void trim(std::string& str)
+    {
+        trim_single_line(str);
+        str += '\0';
+
+        if (str.find('\n') != std::string::npos) {
+
+            std::vector<std::string> lines;
+
+            std::string::size_type pos = 0;
+            for (std::string::size_type i = 0; i < str.length(); i++) {
+                if (str[i] == '\n' || str[i] == '\0') {
+                    lines.push_back(str.substr(pos, i - pos + 1));
+                    pos = i + 1;
                 }
             }
-            line.erase(0, s_pos);
-        }
+            str.erase();
 
-        str.erase();
-        for (auto& line : lines) {
-            str += line;
-            str += "\n";
+            for (auto& line : lines) {
+                if (!is_all_space(line)) {
+                    trim_single_line(line);
+
+                    if (line.back() != '\0')
+                        line += '\n';
+                }
+                else
+                    line = "\n";
+                
+                str += line;
+            }
         }
     }
 

@@ -24,8 +24,7 @@
 #endif
 
 #include "image.hpp"
-#include "single_line_text.hpp"
-#include "multi_line_text.hpp"
+#include "text.hpp"
 
 enum class PageDisplayMode
 {
@@ -53,10 +52,10 @@ private:
     PageDisplayMode mode;
     Component root;
 
-    std::list<Component*> component_tree_cache;
-
     void refresh_cache();
 public:
+    std::list<Component*> component_tree_cache;
+
     Page(PageDisplayMode mode = PageDisplayMode::Unique);
     Page(std::string src, std::string id);
     ~Page();

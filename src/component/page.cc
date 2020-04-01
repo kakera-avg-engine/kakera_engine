@@ -48,46 +48,27 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
             image->set_src(node.attribute("src").as_string());
         }
 
-        if (node_name_is("SingleLineText")) {
-            parent->children.emplace_back(std::make_unique<SingleLineText>());
+        if (node_name_is("Text")) {
+            parent->children.emplace_back(std::make_unique<Text>());
             parent->children.back()->parent = parent;
 
-            SingleLineText* sl_text = (SingleLineText*)parent->children.back().get();
-            sl_text->set_uuid(node.attribute("uuid").as_string());
-            int x = node.attribute("x").as_int();
-            int y = node.attribute("y").as_int();
-            sl_text->set_position(x, y);
-            sl_text->set_font(node.attribute("font").as_string());
-            sl_text->set_fontsize(node.attribute("font-size").as_int());
-            sl_text->set_color(node.attribute("color").as_string());
-            std::string str = node.child_value();
-            StringTools::trim(str);
-            sl_text->set_string(str);
-            sl_text->set_spacing(node.attribute("spacing").as_int());
-        }
-
-        if (node_name_is("MultiLineText")) {
-            parent->children.emplace_back(std::make_unique<MultiLineText>());
-            parent->children.back()->parent = parent;
-
-            MultiLineText* ml_text = (MultiLineText*)parent->children.back().get();
-            ml_text->set_uuid(node.attribute("uuid").as_string());
+            Text* text = (Text*)parent->children.back().get();
+            text->set_uuid(node.attribute("uuid").as_string());
             int w, h, x, y;
             w = node.attribute("width").as_int();
             h = node.attribute("height").as_int();
             x = node.attribute("x").as_int();
             y = node.attribute("y").as_int();
-            ml_text->set_size(w, h);
-            ml_text->set_position(x, y);
-            ml_text->set_font(node.attribute("font").as_string());
-            ml_text->set_fontsize(node.attribute("font-size").as_int());
-            ml_text->set_color(node.attribute("color").as_string());
+            text->set_size(w, h);
+            text->set_position(x, y);
+            text->set_font(node.attribute("font").as_string());
+            text->set_fontsize(node.attribute("font-size").as_int());
+            text->set_color(node.attribute("color").as_string());
             std::string str = node.text().as_string();
             StringTools::trim(str);
-            str += "\n";
-            StringTools::trim_multi_line(str);
-            ml_text->set_string(str);
-            ml_text->set_spacing(node.attribute("spacing").as_int());
+            text->set_string(str);
+            text->set_line_spacing(node.attribute("line-spacing").as_int());
+            text->set_word_spacing(node.attribute("word-spacing").as_int());
         }
     }
 

@@ -1,5 +1,125 @@
 #include "window.h"
 
+void Window::resize_setting(int w, int h)
+{
+    for (auto& page : pages) {
+        page.second->resize(w, h);
+    }
+    glViewport(0, 0, w, h);
+    KAKERA_SHADER_NORMAL.set_projection(w, h);
+    KAKERA_SHADER_TEXT.set_projection(w, h);
+}
+
+void Window::event_executor(SDL_Event& event)
+{
+    switch (event.type)
+    {
+    /* Window events */
+    case SDL_WINDOWEVENT:
+    {
+        switch (event.window.type)
+        {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+        {
+            resize_setting(event.window.data1, event.window.data2);
+            break;
+        }
+        }
+        break;
+    }
+    /* Mouse events */
+    case SDL_MOUSEMOTION:
+    {
+        int x, y;
+        Uint32 button = SDL_GetMouseState(&x, &y);
+        auto page = active_pages.back();
+        Component* com = nullptr;
+        ComponentMouseState state = ComponentMouseState::None;
+        for (auto iter = page->component_tree_cache.rbegin();
+            iter != page->component_tree_cache.rend(); iter++) {
+            state = (*iter)->is_mouse_enter(event.button.x, event.button.y);
+            if (state != ComponentMouseState::None) {
+                com = (*iter);
+                break;
+            }
+        }
+
+        if (state == ComponentMouseState::Entered && com != nullptr) {
+            while (com->parent) {
+                // TODO: event: mouse enter
+                com = com->parent;
+            }
+        }
+        else if (state == ComponentMouseState::Leave && com != nullptr){
+            while (com->parent) {
+                // TODO: event: mouse leave
+                com = com->parent;
+            }
+        }
+        break;
+    }
+    case SDL_MOUSEBUTTONDOWN:
+    {
+        auto page = active_pages.back();
+        Component* com = nullptr;
+        for (auto iter = page->component_tree_cache.rbegin();
+            iter != page->component_tree_cache.rend(); iter++) {
+            if ((*iter)->is_coord_hit(event.button.x, event.button.y)) {
+                com = (*iter);
+                break;
+            }
+        }
+
+        if (com != nullptr) {
+            while (com->parent) {
+                // TODO: event: mouse down
+                com = com->parent;
+            }
+        }
+        break;
+    }
+    case SDL_MOUSEBUTTONUP:
+    {
+        auto page = active_pages.back();
+        Component* com = nullptr;
+        for (auto iter = page->component_tree_cache.rbegin();
+            iter != page->component_tree_cache.rend(); iter++) {
+            if ((*iter)->is_coord_hit(event.button.x, event.button.y)) {
+                com = (*iter);
+                break;
+            }
+        }
+
+        if (com != nullptr) {
+            while (com->parent) {
+                // TODO: event: mouse up
+                if (event.button.clicks == 1) {}
+                    // TODO: event click
+                else if (event.button.clicks == 2) {}
+                    // TODO: event double click
+                com = com->parent;
+            }
+        }
+        break;
+    }
+    case SDL_MOUSEWHEEL:
+    {
+        break;
+    }
+    /* Keyboard events */
+    case SDL_KEYDOWN:
+    {
+        break;
+    }
+    case SDL_KEYUP:
+    {
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 Window::Window()
 {
     window_ptr = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL);
@@ -67,12 +187,7 @@ void Window::run()
     {
         int w, h;
         SDL_GetWindowSize(window_ptr, &w, &h);
-        for (auto& page : pages) {
-            page.second->resize(w, h);
-        }
-        glViewport(0, 0, w, h);
-        KAKERA_SHADER_NORMAL.set_projection(w, h);
-        KAKERA_SHADER_TEXT.set_projection(w, h);
+        resize_setting(w, h);
     }
 
     SDL_SetWindowPosition(window_ptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -92,6 +207,7 @@ void Window::run()
             if (event_queue.type == SDL_QUIT) {
                 quit = true;
             }
+            event_executor(event_queue);
         }
 
         for (auto page : active_pages) page->draw();

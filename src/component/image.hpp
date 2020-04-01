@@ -23,26 +23,28 @@ public:
         render_obj->set_shader(&KAKERA_SHADER_NORMAL);
     }
 
-    Image(Image&& other)
+    Image(Image&& other) noexcept
     {
         width = other.width;
         height = other.height;
         x = other.x;
         y = other.y;
         uuid = other.uuid;
+        mouse_entered = other.mouse_entered;
 
         other.width = 0;
         other.height = 0;
         other.x = 0;
         other.y = 0;
         other.uuid = "";
+        other.mouse_entered = false;
 
         render_obj = std::move(other.render_obj);
     }
 
     ~Image() = default;
 
-    Image& operator=(Image&& other)
+    Image& operator=(Image&& other) noexcept
     {
         if (&other != this) {
             width = other.width;
@@ -50,12 +52,14 @@ public:
             x = other.x;
             y = other.y;
             uuid = other.uuid;
+            mouse_entered = other.mouse_entered;
 
             other.width = 0;
             other.height = 0;
             other.x = 0;
             other.y = 0;
             other.uuid = "";
+            other.mouse_entered = false;
 
             render_obj = std::move(other.render_obj);
         }

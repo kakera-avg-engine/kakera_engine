@@ -12,7 +12,7 @@ extern "C"
 
 #include "component_base.hpp"
 
-// Video type id = 2
+// Video type id = 4
 
 class Video : public Component
 {
