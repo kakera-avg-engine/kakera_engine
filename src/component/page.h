@@ -25,6 +25,7 @@
 
 #include "image.hpp"
 #include "text.hpp"
+#include "video.hpp"
 
 enum class PageDisplayMode
 {
@@ -68,6 +69,9 @@ public:
     void resize(int width, int height);
     void draw();
     void render();
+
+    void on_active();
+    void on_suspend();
 };
 
 #endif // !KAKERA_ENGINE_GRAPHIC_PAGE

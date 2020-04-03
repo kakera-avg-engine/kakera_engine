@@ -197,7 +197,8 @@ Texture* RenderObject::get_texture()
 
 void RenderObject::render()
 {
-    if (!texture || !shader) return;
+    if (!shader)
+        return;
 
     shader->use();
 
@@ -223,8 +224,10 @@ void RenderObject::render()
 
     shader->set_opacity(opacity);
 
-    glActiveTexture(GL_TEXTURE0);
-    texture->bind();
+    if (texture) {
+        glActiveTexture(GL_TEXTURE0);
+        texture->bind();
+    }
 
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -29,15 +29,23 @@ public:
         height = other.height;
         x = other.x;
         y = other.y;
-        uuid = other.uuid;
+        rotation_angle = other.rotation_angle;
+        opacity = other.opacity;
         mouse_entered = other.mouse_entered;
+        animation_target = other.animation_target;
+        animation_steps = other.animation_steps;
+        uuid = std::move(other.uuid);
+        animation_speed = std::move(other.animation_speed);
 
         other.width = 0;
         other.height = 0;
         other.x = 0;
         other.y = 0;
-        other.uuid = "";
+        other.rotation_angle = 0.0f;
+        other.opacity = 255;
         other.mouse_entered = false;
+        other.animation_target = AnimateTarget();
+        other.animation_steps = 0;
 
         render_obj = std::move(other.render_obj);
     }
@@ -51,15 +59,23 @@ public:
             height = other.height;
             x = other.x;
             y = other.y;
-            uuid = other.uuid;
+            rotation_angle = other.rotation_angle;
+            opacity = other.opacity;
             mouse_entered = other.mouse_entered;
+            animation_target = other.animation_target;
+            animation_steps = other.animation_steps;
+            uuid = std::move(other.uuid);
+            animation_speed = std::move(other.animation_speed);
 
             other.width = 0;
             other.height = 0;
             other.x = 0;
             other.y = 0;
-            other.uuid = "";
+            other.rotation_angle = 0.0f;
+            other.opacity = 255;
             other.mouse_entered = false;
+            other.animation_target = AnimateTarget();
+            other.animation_steps = 0;
 
             render_obj = std::move(other.render_obj);
         }
@@ -77,6 +93,18 @@ public:
     {
         Component::set_position(x, y);
         render_obj->set_position(x, y);
+    }
+
+    void set_rotation_angle(float angle) override
+    {
+        Component::set_rotation_angle(angle);
+        render_obj->set_rotation_angle(angle);
+    }
+
+    void set_opacity(uint8_t opacity) override
+    {
+        Component::set_opacity(opacity);
+        render_obj->set_opacity(opacity);
     }
 
     void set_src(const char* src)
@@ -106,7 +134,23 @@ public:
 
     void render() override
     {
+        Component::render();
+        render_obj->set_position(x, y);
+        render_obj->set_size(width, height);
+        render_obj->set_rotation_angle(rotation_angle);
+        render_obj->set_opacity(opacity);
         render_obj->render();
+    }
+
+    void on_click(EventHandler event) override
+    {
+        auto handler = std::get<1>(event);
+        if (handler.button == MouseButton::Left) {
+            AnimateTarget target;
+            target.x = 100;
+            target.y = 100;
+            set_animate(target, 2000, CubicBezier());
+        }
     }
 };
 

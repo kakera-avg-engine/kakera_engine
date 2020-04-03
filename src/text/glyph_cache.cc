@@ -45,8 +45,7 @@ GlyphCache::GlyphCache(FT_Face face)
     this->face = face;
 
     std::string id = kakera::UUID::create();
-    KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat::red));
-    texture = KAKERA_TEXTURE_MANAGER[id];
+    texture = KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(TEXTURE_SIZE, TEXTURE_SIZE, TextureFormat::red));
 }
 
 GlyphCache::~GlyphCache()

@@ -4,55 +4,57 @@
 #include <SDL.h>
 #include <variant>
 
-enum class ComponentMouseState
+enum class MouseState
 {
     Entered,
     Leave,
     None
 };
 
-enum class ComponentMouseButton
+enum class MouseButton
 {
     Left,
     Right,
-    Middle
+    Middle,
+    Custom_1,
+    Custom_2
 };
 
-enum class ComponentMouseWheelDirection
+enum class MouseWheelDirection
 {
     Up,
     Down
 };
 
-struct ComponentMouseMotionEventHandler
+struct MouseMotionEventHandler
 {
     void* page;
     int x, y;
 };
 
-struct ComponentMouseButtonEventHandler
+struct MouseButtonEventHandler
 {
     void* page;
     int x, y;
-    ComponentMouseButton button;
+    MouseButton button;
 };
 
-struct ComponentMouseWheelEventHandler
+struct MouseWheelEventHandler
 {
     void* page;
-    ComponentMouseWheelDirection direction;
+    MouseWheelDirection direction;
     int distance;
 };
 
-struct ComponentKeyEventHandler
+struct KeyEventHandler
 {
     void* page;
     SDL_Scancode keycode;
 };
 
-using ComponentEventHandler = std::variant<ComponentMouseMotionEventHandler,
-                                           ComponentMouseButtonEventHandler,
-                                           ComponentMouseWheelEventHandler,
-                                           ComponentKeyEventHandler>;
+using EventHandler = std::variant<MouseMotionEventHandler,
+                                  MouseButtonEventHandler,
+                                  MouseWheelEventHandler,
+                                  KeyEventHandler>;
 
 #endif // !KAKERA_ENGINE_COMPONENT_EVENT_HANDLER

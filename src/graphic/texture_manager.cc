@@ -1,8 +1,8 @@
 #include "texture_manager.h"
 
-void TextureManager::set_texture(std::string id, Texture&& texture)
+Texture* TextureManager::set_texture(std::string id, Texture&& texture)
 {
-    textures.try_emplace(id, std::make_unique<Texture>(std::move(texture)));
+    return textures.try_emplace(id, std::make_unique<Texture>(std::move(texture))).first->second.get();
 }
 
 Texture* TextureManager::get_texture(std::string id)

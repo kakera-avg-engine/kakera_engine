@@ -20,7 +20,6 @@ private:
     int font_size = 0;
     Font* font = nullptr;
     SDL_Color color = SDL_Color({ 0, 0, 0, 255 });
-    int word_spacing = 0;
     int line_spacing = 0;
 
     bool is_scissor = false;
@@ -43,7 +42,7 @@ private:
 
             for (auto& word : line.words) {
                 word->render(word_x, word_y, line.origin, color);
-                word_x += (word->get_width() + word_spacing);
+                word_x += word->get_width();
             }
 
             word_x = x;
@@ -65,7 +64,6 @@ public:
         font_size = other.font_size;
         font = other.font;
         color = other.color;
-        word_spacing = other.word_spacing;
         line_spacing = other.line_spacing;
         is_scissor = other.is_scissor;
         lines = std::move(other.lines);
@@ -79,7 +77,6 @@ public:
         other.font_size = 0;
         other.font = nullptr;
         other.color = SDL_Color({ 0, 0, 0, 255 });
-        other.word_spacing = 0;
         other.line_spacing = 0;
         other.is_scissor = false;
     }
@@ -101,7 +98,6 @@ public:
             font_size = other.font_size;
             font = other.font;
             color = other.color;
-            word_spacing = other.word_spacing;
             line_spacing = other.line_spacing;
             is_scissor = other.is_scissor;
             lines = std::move(other.lines);
@@ -115,7 +111,6 @@ public:
             other.font_size = 0;
             other.font = nullptr;
             other.color = SDL_Color({ 0, 0, 0, 255 });
-            other.word_spacing = 0;
             other.line_spacing = 0;
             other.is_scissor = false;
         }
@@ -190,7 +185,7 @@ public:
 
         while (i < words.size()) {
             auto& word = words[i];
-            int word_width = word->get_width() + word_spacing;
+            int word_width = word->get_width();
 
             if ((width != 0 && (temp_width + word_width > width)) /* Over width */ ||
                 word_width == 0 /* line breaker*/) {
@@ -259,17 +254,6 @@ public:
         line_spacing += spacing;
     }
 
-    void set_word_spacing(int spacing)
-    {
-        word_spacing += spacing;
-
-        for (auto& line : lines) {
-            for (auto& word : line.words) {
-                word->set_spacing(spacing);
-            }
-        }
-    }
-
     void set_size(int w, int h) override
     {
         Component::set_size(w, h);
@@ -290,6 +274,26 @@ public:
             glDisable(GL_SCISSOR_TEST);
         }
         else {
+            if (width == 0) {
+                for (auto& line : lines) {
+                    int line_width = 0;
+                    for (auto& word : line.words) {
+                        line_width += word->get_width();
+                    }
+
+                    if (line_width > width)
+                        width = line_width;
+                }
+            }
+
+            if (height == 0) {
+                for (auto& line : lines) {
+                    height += line.height;
+                }
+
+                height += ((lines.size() - 1) * line_spacing);
+            }
+
             real_render();
         }
     }

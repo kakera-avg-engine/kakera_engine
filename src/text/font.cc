@@ -4,14 +4,13 @@ Font::Font(FT_Library ft_lib, std::string src)
 {
     this->ft_lib = ft_lib;
 
-    auto font_file = KAKERA_PACKAGE_MANAGER.get_file(src);
-    if (font_file.has_value()) {
-        File file = std::move(font_file.value());
-        FT_Error error = FT_New_Memory_Face(this->ft_lib, (const FT_Byte*)*file, file.size(), 0, &face);
+    auto font = KAKERA_PACKAGE_MANAGER.get_file(src);
+    if (font.has_value()) {
+        font_file = std::move(font.value());
+        FT_Error error = FT_New_Memory_Face(this->ft_lib, (const FT_Byte*)*font_file, font_file.size(), 0, &face);
         if (error) {
             KAKERA_LOG(LogLevel::Error, "Cannot load font file \"{}\".", src);
         }
-        KAKERA_PACKAGE_MANAGER.add_persistent_file(std::move(file));
     }
 }
 

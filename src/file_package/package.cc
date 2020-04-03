@@ -136,9 +136,7 @@ std::optional<File> Package::get_file(std::string filename)
 
     std::ifstream file(path, std::ios::binary);
 
-    file.seekg(0, std::ios_base::end);
-    size = file.tellg();
-    file.seekg(0);
+    size = std::filesystem::file_size(path);
 
     buffer = new char[size];
     file.read(buffer, size);

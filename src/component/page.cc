@@ -68,7 +68,22 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
             StringTools::trim(str);
             text->set_string(str);
             text->set_line_spacing(node.attribute("line-spacing").as_int());
-            text->set_word_spacing(node.attribute("word-spacing").as_int());
+        }
+
+        if (node_name_is("Video")) {
+            parent->children.emplace_back(std::make_unique<Video>());
+            parent->children.back()->parent = parent;
+
+            Video* video = (Video*)parent->children.back().get();
+            video->set_uuid(node.attribute("uuid").as_string());
+            int w, h, x, y;
+            w = node.attribute("width").as_int();
+            h = node.attribute("height").as_int();
+            x = node.attribute("x").as_int();
+            y = node.attribute("y").as_int();
+            video->set_size(w, h);
+            video->set_position(x, y);
+            video->set_src(node.attribute("src").as_string());
         }
     }
 
@@ -142,8 +157,7 @@ void Page::resize(int width, int height)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     KAKERA_TEXTURE_MANAGER.destroy_texture(id);
-    KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(width, height));
-    Texture* color_attachment = KAKERA_TEXTURE_MANAGER[id];
+    Texture* color_attachment = KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(width, height));
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment->get_id(), 0);
     render_obj->set_texture(color_attachment, RenderObject::upside_down_view);
 
@@ -172,4 +186,12 @@ void Page::draw()
 void Page::render()
 {
     render_obj->render();
+}
+
+void Page::on_active()
+{
+}
+
+void Page::on_suspend()
+{
 }

@@ -16,7 +16,6 @@ class PackageManager
 {
 private:
     std::unordered_map<std::string, std::unique_ptr<Package>> packages;
-    std::list<std::unique_ptr<File>> persistent_files;
 
     PackageManager() = default;
     ~PackageManager() = default;
@@ -30,7 +29,6 @@ public:
     Package* operator[](std::string id);
 
     std::optional<File> get_file(std::string src);
-    void add_persistent_file(File&& file);
 
     static PackageManager& get();
 };

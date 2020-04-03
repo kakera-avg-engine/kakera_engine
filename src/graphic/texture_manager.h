@@ -20,7 +20,7 @@ public:
     KAKERA_DISABLE_COPY(TextureManager);
     KAKERA_DISABLE_MOVE(TextureManager);
 
-    void set_texture(std::string id, Texture&& texture);
+    Texture* set_texture(std::string id, Texture&& texture);
     Texture* get_texture(std::string id);
     Texture* operator[](std::string id);
 

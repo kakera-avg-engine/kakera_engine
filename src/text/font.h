@@ -18,6 +18,8 @@ private:
     FT_Library ft_lib = nullptr;
     FT_Face face = nullptr;
 
+    File font_file;
+
     std::list<std::unique_ptr<GlyphCache>> caches;
 public:
     Font(FT_Library ft_lib, std::string src);

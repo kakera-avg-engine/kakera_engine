@@ -34,25 +34,27 @@ void Window::event_executor(SDL_Event& event)
         Uint32 button = SDL_GetMouseState(&x, &y);
         auto page = active_pages.back();
         Component* com = nullptr;
-        ComponentMouseState state = ComponentMouseState::None;
+        MouseState state = MouseState::None;
         for (auto iter = page->component_tree_cache.rbegin();
             iter != page->component_tree_cache.rend(); iter++) {
             state = (*iter)->is_mouse_enter(event.button.x, event.button.y);
-            if (state != ComponentMouseState::None) {
+            if (state != MouseState::None) {
                 com = (*iter);
                 break;
             }
         }
 
-        if (state == ComponentMouseState::Entered && com != nullptr) {
+        MouseMotionEventHandler handler = { page, x, y };
+
+        if (state == MouseState::Entered && com != nullptr) {
             while (com->parent) {
-                // TODO: event: mouse enter
+                com->on_mouse_enter(handler);
                 com = com->parent;
             }
         }
-        else if (state == ComponentMouseState::Leave && com != nullptr){
+        else if (state == MouseState::Leave && com != nullptr){
             while (com->parent) {
-                // TODO: event: mouse leave
+                com->on_mouse_leave(handler);
                 com = com->parent;
             }
         }
@@ -70,9 +72,33 @@ void Window::event_executor(SDL_Event& event)
             }
         }
 
+        MouseButton button;
+        switch (event.button.button)
+        {
+        case SDL_BUTTON_LEFT:
+            button = MouseButton::Left;
+            break;
+        case SDL_BUTTON_RIGHT:
+            button = MouseButton::Right;
+            break;
+        case SDL_BUTTON_MIDDLE:
+            button = MouseButton::Middle;
+            break;
+        case SDL_BUTTON_X1:
+            button = MouseButton::Custom_1;
+            break;
+        case SDL_BUTTON_X2:
+            button = MouseButton::Custom_2;
+            break;
+        default:
+            break;
+        }
+
+        MouseButtonEventHandler handler = { page, event.button.x, event.button.y, button };
+
         if (com != nullptr) {
             while (com->parent) {
-                // TODO: event: mouse down
+                com->on_mouse_down(handler);
                 com = com->parent;
             }
         }
@@ -90,13 +116,40 @@ void Window::event_executor(SDL_Event& event)
             }
         }
 
+
+        MouseButton button;
+        switch (event.button.button)
+        {
+        case SDL_BUTTON_LEFT:
+            button = MouseButton::Left;
+            break;
+        case SDL_BUTTON_RIGHT:
+            button = MouseButton::Right;
+            break;
+        case SDL_BUTTON_MIDDLE:
+            button = MouseButton::Middle;
+            break;
+        case SDL_BUTTON_X1:
+            button = MouseButton::Custom_1;
+            break;
+        case SDL_BUTTON_X2:
+            button = MouseButton::Custom_2;
+            break;
+        default:
+            break;
+        }
+
+        MouseButtonEventHandler handler = { page, event.button.x, event.button.y, button };
+
         if (com != nullptr) {
             while (com->parent) {
-                // TODO: event: mouse up
-                if (event.button.clicks == 1) {}
-                    // TODO: event click
-                else if (event.button.clicks == 2) {}
-                    // TODO: event double click
+                com->on_mouse_up(handler);
+
+                if (event.button.clicks == 1)
+                    com->on_click(handler);
+                else if (event.button.clicks == 2)
+                    com->on_double_click(handler);
+
                 com = com->parent;
             }
         }
@@ -104,15 +157,56 @@ void Window::event_executor(SDL_Event& event)
     }
     case SDL_MOUSEWHEEL:
     {
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+        auto page = active_pages.back();
+        Component* com = nullptr;
+        for (auto iter = page->component_tree_cache.rbegin();
+            iter != page->component_tree_cache.rend(); iter++) {
+            if ((*iter)->is_coord_hit(x, y)) {
+                com = (*iter);
+                break;
+            }
+        }
+
+        if (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+            event.wheel.y *= -1;
+
+        MouseWheelEventHandler handler;
+        handler.page = page;
+        handler.distance = std::abs(event.wheel.y);
+        if (event.wheel.y > 0)
+            handler.direction = MouseWheelDirection::Up;
+        else
+            handler.direction = MouseWheelDirection::Down;
+
+        if (com != nullptr) {
+            while (com->parent) {
+                com->on_mouse_wheel_rotate(handler);
+                com = com->parent;
+            }
+        }
         break;
     }
     /* Keyboard events */
     case SDL_KEYDOWN:
     {
+        auto page = active_pages.back();
+        KeyEventHandler handler = { page, event.key.keysym.scancode };
+        for (auto& com : page->component_tree_cache) {
+            if (com->parent)
+                com->on_key_down(handler);
+        }
         break;
     }
     case SDL_KEYUP:
     {
+        auto page = active_pages.back();
+        KeyEventHandler handler = { page, event.key.keysym.scancode };
+        for (auto& com : page->component_tree_cache) {
+            if (com->parent)
+                com->on_key_up(handler);
+        }
         break;
     }
     default:
@@ -165,11 +259,15 @@ void Window::start_page(std::string id)
 
     if (!page) return;
 
-    if (page->get_display_mode() == PageDisplayMode::Unique && active_pages.empty()) {
+    if (page->get_display_mode() == PageDisplayMode::Unique && !active_pages.empty()) {
+        for (auto a_page : active_pages)
+            a_page->on_suspend();
+
         active_pages.clear();
     }
 
     active_pages.push_back(page);
+    page->on_active();
 }
 
 void Window::fullscreen()

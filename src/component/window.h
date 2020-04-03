@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
+#include <cmath>
 #include "page.h"
 #include "../graphic/shader_normal.hpp"
 #include "../graphic/shader_text.hpp"

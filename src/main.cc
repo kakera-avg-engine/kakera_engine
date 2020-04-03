@@ -9,11 +9,6 @@
 
 #include "glad/glad.h"
 
-extern "C"
-{
-#include "libavformat/avformat.h"
-}
-
 #if (!defined(_DEBUG) || defined(NDEBUG))
 #   include "msgpack.hpp"
 #else
@@ -24,6 +19,8 @@ extern "C"
 #include "log/log.h"
 #include "file_package/package_manager.h"
 #include "text/font_manager.h"
+
+#include "cubic_bezier.hpp"
 
 void load_config(Window& window)
 {
@@ -100,9 +97,6 @@ int main(int argc, char* argv[])
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
-
-    // Init FFmpeg
-    av_register_all();
 
     // Windows HiDPI
 #ifdef _WIN32
