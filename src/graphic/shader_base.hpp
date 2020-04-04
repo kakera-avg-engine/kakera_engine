@@ -17,18 +17,18 @@ protected:
     glm::mat4 projection;
     GLuint program;
 
-    void compile(const char* frag_code)
-    {
-        const char* vertex_code = "#version 430 core\n" \
-            "layout (location = 0) in vec2 vertex;" \
-            "layout (location = 1) in vec2 tex_coord;" \
-            "out vec2 tex_coords;" \
-            "uniform mat4 model;" \
-            "uniform mat4 projection;" \
-            "void main() {" \
-            "tex_coords = tex_coord;" \
-            "gl_Position = projection * model * vec4(vertex, 0.0, 1.0);}";
+    static constexpr char* default_vertex_code = "#version 430 core\n"
+        "layout (location = 0) in vec2 vertex;"
+        "layout (location = 1) in vec2 tex_coord;"
+        "out vec2 tex_coords;"
+        "uniform mat4 model;"
+        "uniform mat4 projection;"
+        "void main() {"
+        "tex_coords = tex_coord;"
+        "gl_Position = projection * model * vec4(vertex, 0.0, 1.0);}";
 
+    void compile(const char* frag_code, const char* vertex_code = default_vertex_code)
+    {
         unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER);
         unsigned int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 

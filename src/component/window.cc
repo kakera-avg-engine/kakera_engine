@@ -8,6 +8,8 @@ void Window::resize_setting(int w, int h)
     glViewport(0, 0, w, h);
     KAKERA_SHADER_NORMAL.set_projection(w, h);
     KAKERA_SHADER_TEXT.set_projection(w, h);
+    KAKERA_SHADER_COLOR_PICKER_CIRCLE.set_projection(w, h);
+    KAKERA_SHADER_COLOR_PICKER_TRIANGLE.set_projection(w, h);
 }
 
 void Window::event_executor(SDL_Event& event)

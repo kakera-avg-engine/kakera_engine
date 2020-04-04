@@ -7,6 +7,8 @@
 #include "AL/alc.h"
 #include "AL/alut.h"
 
+// Audio type id = 3
+
 class Audio : public Component
 {
 private:

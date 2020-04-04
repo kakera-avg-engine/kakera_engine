@@ -51,16 +51,12 @@ private:
         }
     }
 public:
+    KAKERA_DISABLE_COPY(Text);
+
     Text() = default;
     
-    Text(Text&& other) noexcept
+    Text(Text&& other) noexcept : Component::Component(std::move(other))
     {
-        width = other.width;
-        height = other.height;
-        x = other.x;
-        y = other.y;
-        uuid = other.uuid;
-        mouse_entered = other.mouse_entered;
         font_size = other.font_size;
         font = other.font;
         color = other.color;
@@ -68,12 +64,6 @@ public:
         is_scissor = other.is_scissor;
         lines = std::move(other.lines);
 
-        other.width = 0;
-        other.height = 0;
-        other.x = 0;
-        other.y = 0;
-        other.uuid = "";
-        other.mouse_entered = false;
         other.font_size = 0;
         other.font = nullptr;
         other.color = SDL_Color({ 0, 0, 0, 255 });
@@ -84,38 +74,6 @@ public:
     ~Text()
     {
         font = nullptr;
-    }
-
-    Text& operator=(Text&& other) noexcept
-    {
-        if (this != &other) {
-            width = other.width;
-            height = other.height;
-            x = other.x;
-            y = other.y;
-            uuid = other.uuid;
-            mouse_entered = other.mouse_entered;
-            font_size = other.font_size;
-            font = other.font;
-            color = other.color;
-            line_spacing = other.line_spacing;
-            is_scissor = other.is_scissor;
-            lines = std::move(other.lines);
-
-            other.width = 0;
-            other.height = 0;
-            other.x = 0;
-            other.y = 0;
-            other.uuid = "";
-            other.mouse_entered = false;
-            other.font_size = 0;
-            other.font = nullptr;
-            other.color = SDL_Color({ 0, 0, 0, 255 });
-            other.line_spacing = 0;
-            other.is_scissor = false;
-        }
-
-        return *this;
     }
 
     void set_string(std::wstring unicode_str)
@@ -264,6 +222,9 @@ public:
 
     void render() override
     {
+        if (is_hidden)
+            return;
+
         if (is_scissor) {
             int gl_y = KAKERA_SHADER_NORMAL.get_window_size().second - y - height;
             glEnable(GL_SCISSOR_TEST);

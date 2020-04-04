@@ -23,65 +23,12 @@ public:
         render_obj->set_shader(&KAKERA_SHADER_NORMAL);
     }
 
-    Image(Image&& other) noexcept
+    Image(Image&& other) noexcept : Component::Component(std::move(other))
     {
-        width = other.width;
-        height = other.height;
-        x = other.x;
-        y = other.y;
-        rotation_angle = other.rotation_angle;
-        opacity = other.opacity;
-        mouse_entered = other.mouse_entered;
-        animation_target = other.animation_target;
-        animation_steps = other.animation_steps;
-        uuid = std::move(other.uuid);
-        animation_speed = std::move(other.animation_speed);
-
-        other.width = 0;
-        other.height = 0;
-        other.x = 0;
-        other.y = 0;
-        other.rotation_angle = 0.0f;
-        other.opacity = 255;
-        other.mouse_entered = false;
-        other.animation_target = AnimateTarget();
-        other.animation_steps = 0;
-
         render_obj = std::move(other.render_obj);
     }
 
     ~Image() = default;
-
-    Image& operator=(Image&& other) noexcept
-    {
-        if (&other != this) {
-            width = other.width;
-            height = other.height;
-            x = other.x;
-            y = other.y;
-            rotation_angle = other.rotation_angle;
-            opacity = other.opacity;
-            mouse_entered = other.mouse_entered;
-            animation_target = other.animation_target;
-            animation_steps = other.animation_steps;
-            uuid = std::move(other.uuid);
-            animation_speed = std::move(other.animation_speed);
-
-            other.width = 0;
-            other.height = 0;
-            other.x = 0;
-            other.y = 0;
-            other.rotation_angle = 0.0f;
-            other.opacity = 255;
-            other.mouse_entered = false;
-            other.animation_target = AnimateTarget();
-            other.animation_steps = 0;
-
-            render_obj = std::move(other.render_obj);
-        }
-
-        return *this;
-    }
 
     void set_size(int width, int height) override
     {
@@ -134,23 +81,15 @@ public:
 
     void render() override
     {
-        Component::render();
+        if (is_hidden)
+            return;
+
+        play_animate();
         render_obj->set_position(x, y);
         render_obj->set_size(width, height);
         render_obj->set_rotation_angle(rotation_angle);
         render_obj->set_opacity(opacity);
         render_obj->render();
-    }
-
-    void on_click(EventHandler event) override
-    {
-        auto handler = std::get<1>(event);
-        if (handler.button == MouseButton::Left) {
-            AnimateTarget target;
-            target.x = 100;
-            target.y = 100;
-            set_animate(target, 2000, CubicBezier());
-        }
     }
 };
 

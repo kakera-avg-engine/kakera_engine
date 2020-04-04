@@ -1,7 +1,7 @@
 #ifndef KAKERA_ENGINE_COMPONENT_BASE
 #define KAKERA_ENGINE_COMPONENT_BASE
 
-#include "../graphic/render_object.h"
+#include "../graphic/render_object.hpp"
 #include "../graphic/texture.h"
 #include "component_event_handler.h"
 #include "../cubic_bezier.hpp"
@@ -29,6 +29,7 @@ protected:
     float rotation_angle = 0.0f;
     uint8_t opacity = 255;
     std::string uuid;
+    bool is_hidden = false;
 
     AnimateTarget animation_target;
     int animation_steps = 0;
@@ -50,6 +51,7 @@ public:
         y = other.y;
         rotation_angle = other.rotation_angle;
         opacity = other.opacity;
+        is_hidden = other.is_hidden;
         mouse_entered = other.mouse_entered;
         animation_target = other.animation_target;
         animation_steps = other.animation_steps;
@@ -62,38 +64,10 @@ public:
         other.y = 0;
         other.rotation_angle = 0.0f;
         other.opacity = 255;
+        other.is_hidden = false;
         other.mouse_entered = false;
         other.animation_target = AnimateTarget();
         other.animation_steps = 0;
-    }
-
-    Component& operator=(Component&& other) noexcept
-    {
-        if (&other != this) {
-            width = other.width;
-            height = other.height;
-            x = other.x;
-            y = other.y;
-            rotation_angle = other.rotation_angle;
-            opacity = other.opacity;
-            mouse_entered = other.mouse_entered;
-            animation_target = other.animation_target;
-            animation_steps = other.animation_steps;
-            uuid = std::move(other.uuid);
-            animation_speed = std::move(other.animation_speed);
-
-            other.width = 0;
-            other.height = 0;
-            other.x = 0;
-            other.y = 0;
-            other.rotation_angle = 0.0f;
-            other.opacity = 255;
-            other.mouse_entered = false;
-            other.animation_target = AnimateTarget();
-            other.animation_steps = 0;
-        }
-
-        return *this;
     }
 
     bool is(std::string uuid)
@@ -144,6 +118,16 @@ public:
     uint8_t get_opacity()
     {
         return opacity;
+    }
+
+    void hidden()
+    {
+        this->is_hidden = true;
+    }
+
+    void display()
+    {
+        this->is_hidden = false;
     }
 
     virtual void set_animate(AnimateTarget target, int time, CubicBezier speed)
@@ -214,7 +198,7 @@ public:
     }
 
     virtual ~Component() {};
-    virtual void render() { play_animate(); };
+    virtual void render() {};
 
     virtual void on_mouse_enter(EventHandler event) {}
     virtual void on_mouse_leave(EventHandler event) {}

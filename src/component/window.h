@@ -11,6 +11,8 @@
 #include "page.h"
 #include "../graphic/shader_normal.hpp"
 #include "../graphic/shader_text.hpp"
+#include "../graphic/shader_color_picker_circle.hpp"
+#include "../graphic/shader_color_picker_triangle.hpp"
 #include "../copy_and_move.inc"
 #include "../log/log.h"
 #include "../text/font_manager.h"

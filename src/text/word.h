@@ -6,7 +6,7 @@
 #include <memory>
 #include <algorithm>
 #include "font.h"
-#include "../graphic/render_object.h"
+#include "../graphic/render_object.hpp"
 #include "../graphic/shader_text.hpp"
 #include "SDL.h"
 

@@ -33,10 +33,9 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
         if (!parent) return true;
 
         if (node_name_is("Image")) {
-            parent->children.emplace_back(std::make_unique<Image>());
+            Image* image = (Image*)parent->children.emplace_back(std::make_unique<Image>()).get();
             parent->children.back()->parent = parent;
 
-            Image* image = (Image*)parent->children.back().get();
             image->set_uuid(node.attribute("uuid").as_string());
             int w, h, x, y;
             w = node.attribute("width").as_int();
@@ -49,10 +48,9 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
         }
 
         if (node_name_is("Text")) {
-            parent->children.emplace_back(std::make_unique<Text>());
+            Text* text = (Text*)parent->children.emplace_back(std::make_unique<Text>()).get();
             parent->children.back()->parent = parent;
 
-            Text* text = (Text*)parent->children.back().get();
             text->set_uuid(node.attribute("uuid").as_string());
             int w, h, x, y;
             w = node.attribute("width").as_int();
@@ -71,10 +69,9 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
         }
 
         if (node_name_is("Video")) {
-            parent->children.emplace_back(std::make_unique<Video>());
+            Video* video = (Video*)parent->children.emplace_back(std::make_unique<Video>()).get();
             parent->children.back()->parent = parent;
 
-            Video* video = (Video*)parent->children.back().get();
             video->set_uuid(node.attribute("uuid").as_string());
             int w, h, x, y;
             w = node.attribute("width").as_int();
@@ -84,6 +81,20 @@ bool Page::XMLTreeWalker::for_each(pugi::xml_node& node)
             video->set_size(w, h);
             video->set_position(x, y);
             video->set_src(node.attribute("src").as_string());
+        }
+
+        if (node_name_is("ColorPicker")) {
+            ColorPicker* cp = (ColorPicker*)parent->children.emplace_back(std::make_unique<ColorPicker>()).get();
+            parent->children.back()->parent = parent;
+
+            cp->set_uuid(node.attribute("uuid").as_string());
+            int w, h, x, y;
+            w = node.attribute("width").as_int();
+            h = node.attribute("height").as_int();
+            x = node.attribute("x").as_int();
+            y = node.attribute("y").as_int();
+            cp->set_size(w, h);
+            cp->set_position(x, y);
         }
     }
 
@@ -159,7 +170,7 @@ void Page::resize(int width, int height)
     KAKERA_TEXTURE_MANAGER.destroy_texture(id);
     Texture* color_attachment = KAKERA_TEXTURE_MANAGER.set_texture(id, Texture(width, height));
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_attachment->get_id(), 0);
-    render_obj->set_texture(color_attachment, RenderObject::upside_down_view);
+    render_obj->set_texture(color_attachment, upside_down_view);
 
     if (glIsRenderbuffer(rbo)) glDeleteRenderbuffers(1, &rbo);
     glGenRenderbuffers(1, &rbo);

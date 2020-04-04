@@ -2,7 +2,7 @@
 #define KAKERA_ENGINE_GRAPHIC_PAGE
 
 #include "glad/glad.h"
-#include "../graphic/render_object.h"
+#include "../graphic/render_object.hpp"
 #include <memory>
 #include <climits>
 #include <string>
@@ -26,6 +26,7 @@
 #include "image.hpp"
 #include "text.hpp"
 #include "video.hpp"
+#include "color_picker.hpp"
 
 enum class PageDisplayMode
 {

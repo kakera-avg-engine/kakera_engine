@@ -58,43 +58,44 @@ private:
             if (video_frame_cache.size() >= queue_cache_size)
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
 
-            if (format_ctx == nullptr)
-                break;
+            //printf("%x\n", this);
+            if (this) {
+                if (av_read_frame(format_ctx, &packet) >= 0) {
+                    if (packet.stream_index == video_stream_index) {
+                        avcodec_send_packet(codec_ctx, &packet);
+                        if (avcodec_receive_frame(codec_ctx, raw_frame) != 0)
+                            continue;
+                        sws_scale(sws_ctx, raw_frame->data, raw_frame->linesize, 0, codec_ctx->height, rgb_frame->data, rgb_frame->linesize);
 
-            if (av_read_frame(format_ctx, &packet) >= 0) {
-                if (packet.stream_index == video_stream_index) {
-                    avcodec_send_packet(codec_ctx, &packet);
-                    if (avcodec_receive_frame(codec_ctx, raw_frame) != 0)
-                        continue;
+                        auto video_frame_data = std::unique_ptr<unsigned char>(new unsigned char[buffer_size]);
+                        memcpy(video_frame_data.get(), video_buffer, buffer_size);
 
-                    sws_scale(sws_ctx, raw_frame->data, raw_frame->linesize, 0, codec_ctx->height, rgb_frame->data, rgb_frame->linesize);
+                        video_frame_cache.push(std::move(video_frame_data));
 
-                    auto video_frame_data = std::unique_ptr<unsigned char>(new unsigned char[buffer_size]);
-                    memcpy(video_frame_data.get(), video_buffer, buffer_size);
-
-                    video_frame_cache.push(std::move(video_frame_data));
-
+                    }
+                    av_packet_unref(&packet);
                 }
-                av_packet_unref(&packet);
-            }
-            else {
-                packet.data = nullptr;
-                packet.size = 0;
-                av_read_frame(format_ctx, &packet);
-                if (packet.stream_index == video_stream_index) {
-                    avcodec_send_packet(codec_ctx, &packet);
-                    avcodec_receive_frame(codec_ctx, raw_frame);
+                else {
+                    packet.data = nullptr;
+                    packet.size = 0;
+                    av_read_frame(format_ctx, &packet);
+                    if (packet.stream_index == video_stream_index) {
+                        avcodec_send_packet(codec_ctx, &packet);
+                        avcodec_receive_frame(codec_ctx, raw_frame);
 
-                    sws_scale(sws_ctx, raw_frame->data, raw_frame->linesize, 0, codec_ctx->height, rgb_frame->data, rgb_frame->linesize);
+                        sws_scale(sws_ctx, raw_frame->data, raw_frame->linesize, 0, codec_ctx->height, rgb_frame->data, rgb_frame->linesize);
 
-                    auto video_frame_data = std::unique_ptr<unsigned char>(new unsigned char[buffer_size]);
-                    memcpy(video_frame_data.get(), video_buffer, buffer_size);
+                        auto video_frame_data = std::unique_ptr<unsigned char>(new unsigned char[buffer_size]);
+                        memcpy(video_frame_data.get(), video_buffer, buffer_size);
 
-                    video_frame_cache.push(std::move(video_frame_data));
+                        video_frame_cache.push(std::move(video_frame_data));
+                    }
+                    av_packet_unref(&packet);
+                    break;
                 }
-                av_packet_unref(&packet);
-                break;
             }
+            else
+                break;
         }
     }
 public:
